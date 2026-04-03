@@ -1,5 +1,7 @@
 import sqlite3
 import re
+import random
+from copy import deepcopy
 import numpy as np
 import pprint
 import boardlib
@@ -104,14 +106,14 @@ def load_board(db_path: str) -> BoardGraph:
 
     return graph
 
-# Builds a route object from a route searchup in db
-def build_route_from_climb(db_path: str, climb: dict) -> Route:
+# Builds a route object from get_climb and holds from get_hold_position
+def build_route_from_climb(db_path: str, climb: dict, board: BoardGraph) -> Route:
     route = Route(
         name=climb["name"],
         route_id=climb["uuid"],
         grade=climb["grade"],
         frame=climb["frames"],
-        angle=climb["angle"],
+        angle=climb["angle"] if climb["angle"] is not None else climb["stats_angle"],
         author=climb["setter_username"],
         holds=[]
     )
@@ -132,24 +134,114 @@ def build_route_from_climb(db_path: str, climb: dict) -> Route:
             )
         )
 
+    route.compute_metrics(board)
     return route
 
 # Gets a random route at a given grade
-def get_random_graded_route(db_path: str, grade: str) -> Route:
-    pass
+def get_random_graded_route(db_path: str, grade: str, board: BoardGraph, layout_id: int = 1) -> Route:
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    query = """
+    SELECT 
+        c.*,
+        cs.display_difficulty,
+        cs.angle AS stats_angle,
+        dg.boulder_name AS grade
+    FROM climbs c
+    LEFT JOIN climb_stats cs
+        ON c.uuid = cs.climb_uuid
+    LEFT JOIN difficulty_grades dg
+        ON CAST(cs.display_difficulty AS INTEGER) = dg.difficulty
+    WHERE (dg.boulder_name = ? OR dg.boulder_name LIKE ?)
+      AND c.layout_id = ?
+    ORDER BY RANDOM()
+    LIMIT 1
+    """
+
+    cur.execute(query, (grade, f"%/{grade}", layout_id))
+    row = cur.fetchone()
+    conn.close()
+
+    if row is None:
+        raise ValueError(f"No route found for grade {grade} and layout_id {layout_id}")
+
+    climb = dict(row)
+    return build_route_from_climb(db_path=db_path, climb=climb, board=board)
+
+def print_route_summary(route: Route):
+    print(f"Name: {route.name}")
+    print(f"Grade: {route.grade}")
+    print(f"Angle: {route.angle}")
+    print(f"Total holds: {route.metrics.total_holds}")
+    print(f"Hand holds: {route.metrics.total_hand_holds}")
+    print(f"Foot holds: {route.metrics.total_foot_holds}")
+    print(f"Total moves: {route.metrics.total_moves}")
+    print(f"Total length: {route.metrics.total_length:.2f}")
+    print(f"Average move size: {route.metrics.average_move_size:.2f}")
+    print(f"Max move size: {route.metrics.max_move_size:.2f}")
+    print("-" * 40)
+
+def score_route(route: Route, target_stats: dict) -> float:
+    if route.metrics is None:
+        return -1e9
+
+    score = 0.0
+
+    score -= abs(route.metrics.total_holds - target_stats["avg_holds"])
+    score -= abs(route.metrics.total_hand_holds - target_stats["avg_hand_holds"])
+    score -= abs(route.metrics.total_foot_holds - target_stats["avg_foot_holds"])
+    score -= abs(route.metrics.total_length - target_stats["avg_total_length"]) * 0.05
+    score -= abs(route.metrics.average_move_size - target_stats["avg_move_size"]) * 0.1
+    score -= abs(route.metrics.max_move_size - target_stats["avg_max_move"]) * 0.1
+
+    if len(route.start_holds()) < 1:
+        score -= 100
+    if len(route.finish_holds()) < 1:
+        score -= 100
+
+    starts = route.start_holds()
+    finishes = route.finish_holds()
+    if starts and finishes:
+        avg_start_y = sum(h.y for h in starts) / len(starts)
+        avg_finish_y = sum(h.y for h in finishes) / len(finishes)
+        if avg_finish_y > avg_start_y:
+            score += 20
+        else:
+            score -= 50
+
+    if len(route.used_hole_ids()) != len(route.holds):
+        score -= 50
+
+    return score
+
+def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30, layout_id: int = 1) -> dict:
+    routes = [
+        get_random_graded_route(db_path=db_path, grade=grade, board=board, layout_id=layout_id)
+        for _ in range(n)
+    ]
+
+    return {
+        "avg_holds": sum(r.metrics.total_holds for r in routes) / n,
+        "avg_hand_holds": sum(r.metrics.total_hand_holds for r in routes) / n,
+        "avg_foot_holds": sum(r.metrics.total_foot_holds for r in routes) / n,
+        "avg_total_length": sum(r.metrics.total_length for r in routes) / n,
+        "avg_move_size": sum(r.metrics.average_move_size for r in routes) / n,
+        "avg_max_move": sum(r.metrics.max_move_size for r in routes) / n,
+    }
 
 def main():
     db_path = "kilter.db"
-    climb_name = "Moonlight"
-    climbs = get_climb(db_path=db_path, name=climb_name)
+    target_grade = "V5"
 
-    climb = climbs[0]
+    board = load_board(db_path=db_path)
+    board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
-    graph = load_board(db_path=db_path)
-    route = build_route_from_climb(db_path=db_path, climb=climb)
 
-    print(graph)
-    print(route)
+    route = get_random_graded_route(db_path=db_path, grade=target_grade, board=board)
+
+    print_route_summary(route=route)
 
 if __name__ == "__main__":
     main()
