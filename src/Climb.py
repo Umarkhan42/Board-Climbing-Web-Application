@@ -7,7 +7,7 @@ import pprint
 import boardlib
 from PIL import Image, ImageDraw
 from boardgraph import HoldNode, MoveEdge, BoardGraph
-from routegraph import RouteHold, Route
+from routegraph import RouteHold, Route, RouteDNA
 
 ROLES = {12: "START", 13: "MIDDLE", 14:"FINISH", 15:"FOOT-ONLY"}
 FOOTHOLDS = {
@@ -124,6 +124,9 @@ def build_route_from_climb(db_path: str, climb: dict, board: BoardGraph) -> Rout
         if info is None:
             continue
 
+        if info["hole_id"] not in board.nodes:
+            continue
+
         route.holds.append(
             RouteHold(
                 placement_id=info["placement_id"],
@@ -170,6 +173,7 @@ def get_random_graded_route(db_path: str, grade: str, board: BoardGraph, layout_
     climb = dict(row)
     return build_route_from_climb(db_path=db_path, climb=climb, board=board)
 
+# Prints a summary of the route 
 def print_route_summary(route: Route):
     print(f"Name: {route.name}")
     print(f"Grade: {route.grade}")
@@ -182,6 +186,185 @@ def print_route_summary(route: Route):
     print(f"Average move size: {route.metrics.average_move_size:.2f}")
     print(f"Max move size: {route.metrics.max_move_size:.2f}")
     print("-" * 40)
+
+# Converts a route object to a DNA object
+def route_to_dna(route: Route) -> RouteDNA:
+    return RouteDNA(
+        start_holds=[h.hole_id for h in route.start_holds()],
+        hand_holds=[h.hole_id for h in route.middle_holds()],
+        finish_holds=[h.hole_id for h in route.finish_holds()],
+        foot_holds=[h.hole_id for h in route.foot_holds()],
+    )
+
+# Converts a DNA object to a Route object
+def dna_to_route(dna: RouteDNA, board: BoardGraph, grade: str = None, angle: int = None) -> Route:
+    holds = []
+
+    for hole_id in dna.start_holds:
+        node = board.get_node(hole_id)
+        holds.append(RouteHold(
+            placement_id=-1,
+            hole_id=hole_id,
+            role="START",
+            x=node.x,
+            y=node.y
+        ))
+
+    for hole_id in dna.hand_holds:
+        node = board.get_node(hole_id)
+        holds.append(RouteHold(
+            placement_id=-1,
+            hole_id=hole_id,
+            role="MIDDLE",
+            x=node.x,
+            y=node.y
+        ))
+
+    for hole_id in dna.finish_holds:
+        node = board.get_node(hole_id)
+        holds.append(RouteHold(
+            placement_id=-1,
+            hole_id=hole_id,
+            role="FINISH",
+            x=node.x,
+            y=node.y
+        ))
+
+    for hole_id in dna.foot_holds:
+        node = board.get_node(hole_id)
+        holds.append(RouteHold(
+            placement_id=-1,
+            hole_id=hole_id,
+            role="FOOT-ONLY",
+            x=node.x,
+            y=node.y
+        ))
+
+    route = Route(
+        name="generated",
+        route_id=None,
+        grade=grade,
+        frame=None,
+        angle=angle,
+        author="GA",
+        holds=holds
+    )
+
+    route.compute_metrics(board)
+    return route
+
+# Calculates the fitness of the route
+def calc_fitness(dna: RouteDNA, board: BoardGraph, target_stats: dict, target_grade: str = None) -> float:
+    route = dna_to_route(dna, board, grade=target_grade)
+    dna.fitness = score_route(route, target_stats)
+    return dna.fitness
+
+# Given 2 DNAs, merge them to create a child DNA 
+def crossover(a: RouteDNA, b: RouteDNA) -> RouteDNA:
+    hand_mid = random.randint(0, min(len(a.hand_holds), len(b.hand_holds)))
+    foot_mid = random.randint(0, min(len(a.foot_holds), len(b.foot_holds)))
+
+    child = RouteDNA(
+        start_holds=a.start_holds[:1] + b.start_holds[1:],
+        hand_holds=a.hand_holds[:hand_mid] + b.hand_holds[hand_mid:],
+        finish_holds=b.finish_holds[:] if b.finish_holds else a.finish_holds[:],
+        foot_holds=a.foot_holds[:foot_mid] + b.foot_holds[foot_mid:]
+    )
+
+    child.start_holds = list(dict.fromkeys(child.start_holds))
+    child.hand_holds = list(dict.fromkeys(child.hand_holds))
+    child.finish_holds = list(dict.fromkeys(child.finish_holds))
+    child.foot_holds = list(dict.fromkeys(child.foot_holds))
+
+    return child
+
+# Mutation
+def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
+    hand_ids = list(board.hand_nodes)
+    foot_ids = list(board.foot_nodes)
+
+    used = set(dna.start_holds + dna.hand_holds + dna.finish_holds + dna.foot_holds)
+
+    for i in range(len(dna.hand_holds)):
+        if random.random() < mutation_rate:
+            candidates = [h for h in hand_ids if h not in used or h == dna.hand_holds[i]]
+            if candidates:
+                new_hole = random.choice(candidates)
+                used.discard(dna.hand_holds[i])
+                dna.hand_holds[i] = new_hole
+                used.add(new_hole)
+
+    for i in range(len(dna.foot_holds)):
+        if random.random() < mutation_rate:
+            candidates = [h for h in foot_ids if h not in used or h == dna.foot_holds[i]]
+            if candidates:
+                new_hole = random.choice(candidates)
+                used.discard(dna.foot_holds[i])
+                dna.foot_holds[i] = new_hole
+                used.add(new_hole)
+
+    dna.start_holds = list(dict.fromkeys(dna.start_holds))
+    dna.hand_holds = list(dict.fromkeys(dna.hand_holds))
+    dna.finish_holds = list(dict.fromkeys(dna.finish_holds))
+    dna.foot_holds = list(dict.fromkeys(dna.foot_holds))
+
+# Run the Genetic Algorithm
+def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,population_size: int = 20,generations: int = 10,mutation_rate: float = 0.1):
+    
+    population = initial_dna_population(
+        db_path=db_path,
+        board=board,
+        grade=target_grade,
+        size=population_size
+    )
+
+    for gen in range(generations):
+        for dna in population:
+            calc_fitness(dna, board, target_stats, target_grade)
+
+        population.sort(key=lambda d: d.fitness, reverse=True)
+        print(f"Generation {gen}: best fitness = {population[0].fitness:.2f}")
+
+        survivors = population[: population_size // 2]
+
+        children = []
+        while len(children) < population_size - len(survivors):
+            parent_a = random.choice(survivors)
+            parent_b = random.choice(survivors)
+
+            child = crossover(parent_a, parent_b)
+            mutate(child, board, mutation_rate)
+            children.append(child)
+
+        population = survivors + children
+
+    for dna in population:
+        calc_fitness(dna, board, target_stats, target_grade)
+
+    population.sort(key=lambda d: d.fitness, reverse=True)
+    best_dna = population[0]
+    best_route = dna_to_route(best_dna, board, grade=target_grade)
+
+    return best_dna, best_route
+
+# Initial population which is created by getting random routes at the grade given
+def initial_dna_population(db_path: str, board: BoardGraph, grade: str, size: int = 20) -> list[RouteDNA]:
+    population = []
+
+    for _ in range(size):
+        route = get_random_graded_route(db_path=db_path, grade=grade, board=board)
+        population.append(route_to_dna(route))
+
+    return population
+
+# Is a valid route
+def is_valid_route(route: Route) -> bool:
+    return (
+        route.metrics is not None
+        and len(route.holds) > 0
+        and len(route.start_holds()) >= 1
+        and len(route.finish_holds()) >= 1
+    )
 
 def score_route(route: Route, target_stats: dict) -> float:
     if route.metrics is None:
@@ -217,10 +400,22 @@ def score_route(route: Route, target_stats: dict) -> float:
     return score
 
 def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30, layout_id: int = 1) -> dict:
-    routes = [
-        get_random_graded_route(db_path=db_path, grade=grade, board=board, layout_id=layout_id)
-        for _ in range(n)
-    ]
+    routes = []
+
+    while len(routes) < n:
+        route = get_random_graded_route(
+            db_path=db_path,
+            grade=grade,
+            board=board,
+            layout_id=layout_id
+        )
+
+        print(f"Route {len(routes)+1} Summary\n")
+
+        print_route_summary(route)
+
+        if is_valid_route(route):
+            routes.append(route)
 
     return {
         "avg_holds": sum(r.metrics.total_holds for r in routes) / n,
@@ -238,11 +433,29 @@ def main():
     board = load_board(db_path=db_path)
     board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
-    for i in range(100):
+    print(board)
 
-        route = get_random_graded_route(db_path=db_path, grade=target_grade, board=board)
+    target_stats = sample_grade_stats(db_path, board, target_grade, n=10)
 
-        print_route_summary(route=route)
+    print("\nTarget stats:")
+    for k, v in target_stats.items():
+        print(f"{k}: {v:.2f}")
+
+    best_dna, best_route = run_ga(
+        db_path=db_path,
+        board=board,
+        target_grade=target_grade,
+        target_stats=target_stats,
+        population_size=20,
+        generations=10,
+        mutation_rate=0.1
+    )
+
+    print("\nBest DNA:")
+    print(best_dna)
+
+    print("\nBest generated route:")
+    print_route_summary(best_route)
 
 if __name__ == "__main__":
     main()

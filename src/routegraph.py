@@ -23,6 +23,13 @@ class RouteMetrics:
     max_move_size: float = 0.0
     total_hold_difficulty: float = 0.0
 
+@dataclass
+class RouteDNA:
+    start_holds: List[int] = field(default_factory=list)
+    hand_holds: List[int] = field(default_factory=list)
+    finish_holds: List[int] = field(default_factory=list)
+    foot_holds: List[int] = field(default_factory=list)
+    fitness: float = 0.0
 
 @dataclass
 class Route:
@@ -80,12 +87,18 @@ class Route:
         total_hold_difficulty = 0.0
 
         for hold in self.holds:
+            if hold.hole_id not in board.nodes:
+                continue
             node = board.get_node(hold.hole_id)
             total_hold_difficulty += node.difficulty
 
         for i in range(len(ordered_holds) - 1):
             a = ordered_holds[i]
             b = ordered_holds[i + 1]
+
+            if a.hole_id not in board.nodes or b.hole_id not in board.nodes:
+                continue
+
             dist = board.distance_between(a.hole_id, b.hole_id)
             total_length += dist
             move_sizes.append(dist)
