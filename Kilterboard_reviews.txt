@@ -1,0 +1,574 @@
+FROM GOOGLE REVIEWS:
+
+
+Samuel
+February 7, 2026
+For me it does what it should, but has an amateurish and confusing interface overall, including unintuitive button placement and icon choices, as well as weird structure of menues and option prioritisation. And don't get me started on the cluttered Kilterboard World Select screen. Also the finicky building of routes can be torture. Seemingly not much thought and care spent on how one has to interact with the App. Disappointing.
+5 people found this review helpful
+Did you find this helpful?
+
+Kevin Bui
+March 18, 2026
+If browsing climbs was improved the app would be much better. It would be nice to integrate a worldwide popularity and trending list instead of having to either search or use other gym lists. Also adding a quick + counter button for the current set would be great.
+Did you find this helpful?
+
+Pyry Koivistoinen
+February 13, 2026
+Before the UI update the app was laggy, but in a predictable way. Now recent update brought a new UI which nobody probably asked for and made the the app even more laggy in more unpredictable way. The app might crash while switching a route, or the list of problems will never load. Please just keep the app appearance as it is, and focus on performance!
+3 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+February 13, 2026
+Hi Pyry. Please send a email to support@auroraclimbing.com with more information to discuss.
+
+matteo guida
+June 19, 2025
+It's frustrating that when setting a boulder, there's a maximum number of holds that can be turned on at the same time, counting both hands and feet. This really limits the options when trying to set endurance-style boulders, like circuits, without using the mode that turns lights on and off as you go, which is suboptimal as involves speed. Would be great to not have this limitation in future release
+5 people found this review helpful
+Did you find this helpful?
+
+Joshua Wise
+January 26, 2023
+At my gym, there is about a fifty percent chance that the kilter board is unusable because people forget to disconnect their phones from the board when they are done. The app doesn't allow you to connect if someone else is already connected. Please consider making it so more than one phone can connect or if one phone is attempting to connect to the board that the existing phone gets kicked. Otherwise a solid experience.
+9 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+January 26, 2023
+Hi Joshua. All of our LED kits sold since May 2019 do allow multiple people to connect. Please send me an email to discuss support@auroraclimbing.com
+
+Martin Cernicka
+August 12, 2025
+App and board works well for basic use. The initial board selection could be improved - e.g. from a list, near your current location. Currently having to select from all the boards on the continent seems ridiculous. The map loads slowly. Problem search really should include more criteria - hold size, dynos, reachy moves, crossing, etc. The most popular boulders are those which are the softest. Please do something about it.
+2 people found this review helpful
+Did you find this helpful?
+
+A Google user
+January 25, 2020
+Pros: Fast, lightweight, no ads Cons: - No text box for searching by username. You have to scroll through ALL usernames. - Can't open a problem via the logbook. - Can't sort the logbook by grade. I love using the kilter board. But please, add some more functionality to the app. I would have to problem paying a few dollars for a premium version.
+9 people found this review helpful
+Did you find this helpful?
+
+Mitch Ryan
+January 1, 2022
+Overall a pretty good app, especially compared to competitors like Moonboard (which sets a very low bar, admittedly). Would appreciate it it was not mandatory to fill the "difficulty" field when logging an ascent. I am fairly new to bouldering and I have no idea what each grade should feel like on the Fontainbleau scale. Perhaps the grading system could be simplified to an upgrade/downgrade/ignore mechanism.
+4 people found this review helpful
+Did you find this helpful?
+
+Roberto Martelloni
+February 17, 2022
+The app does not allow to track attempts on problems, only send. This lack of feature severally limit the log training opportunities. It would be nice to filter problems using the small foot holds but it not possible. It would also be nice to 'follow' settlers and prioritize the boulders from them. Overall, training boards are extremely powerful tools to train but it seems there is not yet in the climbing community the right mindset to move from 'climb hard' to measure volume, quantify it and implement a training regime based on stats and not on feeling. It would also be nice to have some sort of benchmark as per the moonboard - there are huge disparities on how the grade are reported, some established climber should start to set some benchmark for each grade. We are going in the right direction, but there is a lot to do.
+3 people found this review helpful
+Did you find this helpful?
+
+Eduard Bosch Bertran
+November 6, 2025
+The board is amazing, the app is terribly slow. It loads all boulders each time you navigate to the list. Please, add pagination!
+3 people found this review helpful
+Did you find this helpful?
+
+Matt Balmer
+December 5, 2024
+UI is frustrating. Not just the setting page, but the entire app feels clunky and cheap. No easy way to view your drafts, for example. Backend also very limited. Can delete a boulder, but this doesn't free up the name for use, even if it has zero climbs. Or rename a boulder. Or view/undelete a boulder you've marked as deleted. Really needs some love.
+6 people found this review helpful
+Did you find this helpful?
+
+Corben L.
+November 6, 2025
+really love sitting around unable to connect to my board because the app is broken to hell and back. snarky responses from the devs are super helpful too.
+Did you find this helpful?
+Aurora Climbing
+November 6, 2025
+Please email support@auroraclimbing.com for assistance. We have successfully assisted other Android users.
+
+jerry verhoeven
+October 27, 2021
+Could be a lot better. -Crashes often on (re)launch -Disconnects from the board after a while (auto disconnect is off) -Filtering is quite slow -New climbs are lost, everyone is climbing the boulders that already have the most sends -Can't share drafts with friends to test climb them -Keeping track of your own sets is weird (search my own username, what?) -Putting all functionality behind search is clunky. Let me see my climbs, my tags etc. Someone mentioned a profile, I think that's good.
+9 people found this review helpful
+Did you find this helpful?
+
+A Google user
+January 30, 2020
+I think this is a good start and gets all of the basics well. When putting together a new concept it's challenging to foresee how people will use the app, which features work well, which won't + what's missing. I hope the folks at Kilter will reflect on this, read the reviews and make the changes people want to see. A big one for me is sharing. - All users should see which problem is on the board. - Problem sharing between users. - Shareable curated lists (warm ups, deadpoints, projects etc.)
+8 people found this review helpful
+Did you find this helpful?
+
+Peter Dragon Sky
+July 26, 2020
+Good Except when you want to save your project to edit it later. It doesn't allow you to do it. There should be option to edit your problems/projects or delete it. If you made a mistake with hold on your set up it stays there forever. Grading should be average of what people think it is. Few times went on warm up V1-V2 impossible to do. Same with star rating. You should be able to give your recommendation of quality and difficulty lvl as a guideline. Final rating should be based on users.
+4 people found this review helpful
+Did you find this helpful?
+
+Jerome Chorel
+July 16, 2024
+This is simply broken, I have two phones: on one it simply gets stuck connecting to the board whereas on the other the app crashes constantly. I was once considering getting a homeboard but wow would I not do this with this kind of software, it's probably coded by one guy and it's not his full time job...
+2 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+July 17, 2024
+Hi Jerome. Please send us an email so we can help. support@auroraclimbing.com
+
+A Google user
+February 3, 2020
+It's pretty frustrating that the IOS version of this app has a "tags" feature where you can set your own tags and search by them but the android version does not. You basically can't make your own playlists of climbs on the android version. Huge bummer.
+4 people found this review helpful
+Did you find this helpful?
+
+Zach Weaver
+August 27, 2020
+Love the kilter board and creating problems, the app it's pretty damn good I just wish as a setter there was a delete problem option. I made one with wrong angle set and it's way harder than what is graded haha. My fault but if I could delete it or edit it that'd be amazing. Maybe a future update? Other than that great app.
+2 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+August 27, 2020
+Glad you are enjoying the app. We are working on many features. We can remove a boulder problem for you. Please send us an email support@auroraclimbing.com
+
+A Google user
+November 30, 2019
+Just really bad, very clunky. No options to share problems with friends, hard to navigate, cant look at problems without wiping what's already on the board. Filter feature isnt specific. Would be good to be able to make a wishlist.
+Did you find this helpful?
+
+Andrew M
+March 22, 2025
+The beta videos on this app are absolutely terrible. It seems like 90% of the people that post beta videos on Instagram also include five other boulders in their post. You have to waste so much time flipping through people's Instagram posts just to find the boulder you're looking for. then there's another group of people that post data videos but then make their Instagram private so you can't see them. i just watched a video where the guy didn't even send the boulder. this needs to be fixed
+1 person found this review helpful
+Did you find this helpful?
+
+Jack Wilke
+August 24, 2021
+Excellent user interface - menus are logical and convenient. The ability to save drafts is super helpful because I rarely start and finish my sets in the same session. Connects well with my gym's board without issue. Incredibly responsive customer support team. Great team and great app!
+4 people found this review helpful
+Did you find this helpful?
+
+A Google user
+February 14, 2019
+Pretty cool overall. Still room to add a few features. The biggest one that everyone mentions is the need to flip back and forth between problems to make it easier for two people to share. Also, when you start the app it asks you to create a wall and doesn't seem to be a way to skip it.
+1 person found this review helpful
+Did you find this helpful?
+
+Brodie Peterson
+November 10, 2020
+I love the kilter board but this app is trash. Why don't I have a profile that has my routes in it? I have to look myself up to find my route? And can't edit anything? You should be able to follow other setters. I don't understand the user interface because it's terrible.
+6 people found this review helpful
+Did you find this helpful?
+
+Andrei Opait
+November 15, 2025
+pretty good app, but its a bit confusing at the beginning until you get used to it.
+Did you find this helpful?
+
+A Google user
+May 8, 2019
+Overall good functionality but i would like to be able to edit my own climbs thay I set so i can save projects that im not done with yet for later insted of needing to finalize everything before you save. A feedback feature where we can send in feedback to the developer would be nice too.
+4 people found this review helpful
+Did you find this helpful?
+
+Stephen Schieberl
+January 26, 2025
+Haven't been able to connect the Android app to a Kilter Board in ages. I have to bring an old iPhone to the gym to connect. I've uninstalled/reinstalled countless times, and tried connecting from my wife's phone (also Android). Straight up does not work.
+2 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+January 26, 2025
+This is an Android system settings issue, not an app issue. Please email support@auroraclimbing.com for assistance.
+
+Nick Titterton
+January 11, 2023
+Great app. Of course one can always ask for more features, but I feel like theyve made some really solid choices on what to focus on. Personally I like using tags + timer and routes for power endurance workouts.
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+January 12, 2023
+Thanks, Nick! Glad you're enjoying the app and your training.
+
+A Google user
+August 20, 2019
+The app is a fast, responsive, and simple way to interface with the kilter board. Connecting to the board and getting a problem to light up takes less than 10 seconds after opening the app! The part I've been most impressed with was the support team, I notified them of a bug and later saw it patched out. They seem dedicated to improving the app over time and providing the best support they can. Overall, very happy with the kilter board app.
+5 people found this review helpful
+Did you find this helpful?
+
+Ben (ben stoc)
+May 23, 2024
+Updating my review If you're stuck on the syncronizing screen try turning off your wifi. Once I turned wifi off it loaded immediately and I could turn Wi-Fi back. on no problem. Hope this helps someone!
+Did you find this helpful?
+
+KaosNOVA
+May 7, 2024
+App has never worked. Tried wifi, tried data. Connection works on any other app but doesn't load anything on kilter board. Tried uninstalling and reinstalling, still nothing. Loads for 15mins and says failed to try whatever it was connecting to
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+May 7, 2024
+The data center issue has been resolved. App functionality should be back to normal. Thanks for your patience. Please email if you have any other issues support@auroraclimbing.com .
+
+Carter Yancey
+August 21, 2020
+Was having difficulty connecting to the board at first. I emailed support and they had a solution for me before I even finished my session. So far, everything else has worked perfectly!
+1 person found this review helpful
+Did you find this helpful?
+
+Antonín Drdácký
+September 26, 2025
+Super slow filtering. Even back from detail from filtering. Just lower the default batch from about a 1000 to like 50. Then it will be lightning fast. Or allow me a parameter "batch" in filtering.
+3 people found this review helpful
+Did you find this helpful?
+
+JAN JAN
+September 13, 2024
+this app does the board unjustice. they should hire an intern or someone with atleast some programming knowledge to fix this. even my phone suggests deleting this app because it runs so poorly. i wont go into full detail but frequent crashes and very slow / unresponsive. oh, and the timer is actually ~1.5x slower than a regular timer 🤣because of how much lag the app has
+10 people found this review helpful
+Did you find this helpful?
+
+A Google user
+March 25, 2019
+As the prior review said, I'm unable to get past creating a wall when I first signed up and logged in. Since I don't want to create a wall, this makes the app unusable.
+6 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+July 6, 2020
+The app needs to know a little configuration info about your wall in order to show the climbs and grades that are appropriate for your wall.
+
+Kevin Wright
+July 25, 2025
+The app was great but I have seem to have lost my completed climbs and my liked climbs? I've been using for 2 years but it only has my last 2 sessions Edit: You're right I did have 2 accounts although confusing as they must have used the same email address
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+July 22, 2025
+You may have multiple accounts and the missing data is associated with one of the accounts you're not using. Please email support@auroraclimbing.com
+
+A Google user
+February 26, 2020
+1. it'd be nice to be able to edit problems, or at least start a new problem from an existing one. 2. not sure if it's the board or the app, the board won't refresh to the selected problem (the spot denver) 3. is this app source code on github? would like to help make it better.
+6 people found this review helpful
+Did you find this helpful?
+
+Alexander
+June 15, 2022
+Doesn't work on Android. I've sat among a group of iOS users who all seamlessly switched their routes in turn, but my phone never connected. Even set the (auto disconnect on some iOS devices)
+7 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+June 15, 2022
+Android permissions for Bluetooth can be tricky to get right. Please email support@auroraclimbing.com for assistance.
+
+Jinny Ye
+January 31, 2023
+Great app overall. Downside is my phone can't connect to bluetooth speakers and the app at the same time. So no kiltering while listening to tswift :(
+Did you find this helpful?
+
+Thomas Gilligan
+November 4, 2021
+Been trying to use the app for 2 months now. I update my version every couple weeks. Always times out synchronizing. Cant get it to work, yes ive checked if i have service and tried many times.
+4 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+November 4, 2021
+Hi Thomas. Please send me an email to discuss peter@auroraclimbing.com.
+
+Gary Alfrey
+March 11, 2021
+Decent app, but it lacks quite a few features that would be useful: 1. Follow other climbers/setters 2. View the complete send history of a problem and each climbers proposed rating. 3. Profile Editing - seriously how can I not edit my own profile!
+4 people found this review helpful
+Did you find this helpful?
+
+Kekulam
+August 18, 2023
+Unable to connect via bluetooth and have tinkered with everything related to my bluetooth. Just gave up after trying more than 20 times.
+2 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+August 19, 2023
+Sometimes Android doesn't want to play nicely with Bluetooth. Please send an email to support@auroraclimbing.com
+
+Ethan Naylor
+April 16, 2021
+Great app with heaps of cool problems. Would be cooler if: 1) you could see what others are climbing. 2) you could mark down attempts as you are working a climb.
+1 person found this review helpful
+Did you find this helpful?
+
+Urban Prah
+October 20, 2023
+Functional. However for an 10k+ eur system board I would expect a more polished user experience. Random crashes, fairly unintuitive, outdated looks.
+4 people found this review helpful
+Did you find this helpful?
+Aurora Climbing
+October 20, 2023
+Please send me a message to discuss any crashes you've experienced support@auroraclimbing.com
+
+Rize Dmitri
+March 4, 2025
+Don't load all the list of problems at once. It slow downs the app. When typing it lags so much. Maybe try lazy loading?
+1 person found this review helpful
+Did you find this helpful?
+
+mark
+February 21, 2025
+Poorly made app that doesn't do the board justice. Extremely slow, clearly doesn't cache in the appropriate place, crashes regularly.
+1 person found this review helpful
+Did you find this helpful?
+
+B L
+January 7, 2023
+Solid. Would like to be able to save circuits. The community would also benefit from benchmarks like the moonboard.
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+January 7, 2023
+Please send us a message about circuits. support@auroraclimbing.com
+
+Francisco Bueno
+October 3, 2023
+Great app and support for it!, The Aurora Team were super responsive when an issue presented with the Kilter Board, and now all is working without any issue, kudos!
+Did you find this helpful?
+Aurora Climbing
+October 4, 2023
+Glad to help, Francisco.
+
+Jacob Richardson
+August 25, 2023
+Great stuff I would say only thing that could improve is if you could find out what problem is already on the board when you turn up after someone else's session
+Did you find this helpful?
+
+Andrew Reitz
+September 21, 2023
+Mostly works as expected. As with all the Aurora apps it crashes a lot.
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+September 21, 2023
+Hi Andrew. Please send me an email about the crashing support@auroraclimbing.com
+
+Conor Evans
+June 9, 2024
+Of course it's impressive, but it is also filled with bugs and 9/10 I am unable to save my ascents! Needs a fix pronto
+Did you find this helpful?
+Aurora Climbing
+June 9, 2024
+Hi Conor. Please send us a message about saving ascents. support@auroraclimbing.com
+
+Isaac Dumlao
+October 23, 2023
+Can't even log in. Haven't used the app in months and it keeps screaming at me that I turned in too many requests and get blocked out
+Did you find this helpful?
+
+Bryce L
+December 16, 2024
+Been 3 years since they said benchmarks/classics would be added ..............must be nice to be lazy! Looks like tension got it but the kilter intern didn't get the memo
+1 person found this review helpful
+Did you find this helpful?
+
+Valtteri Eloranta
+March 15, 2025
+2 stars because I like the wall. App is really slow, quite often problems with connetion to the wall and the UI doesn't have a good flow. Really hope for a big update for the app... Maybe completely new one? 🤷🏽
+2 people found this review helpful
+Did you find this helpful?
+
+Lawrence
+March 9, 2023
+Why would they remove the filter by difficulty setting? Or the ability the swipe left and right from route to route? Unbelievable
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+March 9, 2023
+Those features are all still there. Tap on the Boards tab at the bottom of the screen. Email for more support@auroraclimbing.com
+
+Rhianna Hickey
+December 13, 2022
+Can't use the search function. Errors out every single time I try to type. Makes the app unusable.
+Did you find this helpful?
+Aurora Climbing
+December 16, 2022
+I've published a new app version which fixes the Google Maps search issue. Please update the app and give it a try. If you have any issues, you can email us at support@auroraclimbing.com
+
+A Google user
+December 17, 2019
+Terrible interface. Why cant you show name and topo of current route? Looks like not much thought went into this app
+2 people found this review helpful
+Did you find this helpful?
+
+Zachariah Noble
+January 10, 2024
+when trying to create an account for the first time, it simply says "can not create account" without ever giving a reason. horrible. at least tell me what to do
+1 person found this review helpful
+Did you find this helpful?
+
+James Parker
+April 18, 2024
+Great app. Feature request - when selecting different angles from the problem page, show which angles the user sent the problem.
+Did you find this helpful?
+
+Maxwell Seward
+October 3, 2023
+Stopped working entirely. Failed sync or too many requests. Great board, Bad app.
+Did you find this helpful?
+Aurora Climbing
+October 3, 2023
+Please send an email so we can help. support@auroraclimbing.com
+
+Bob Chin
+October 2, 2021
+Over all good app, but it really needs a bookmarking/flag ability for projects.
+Did you find this helpful?
+Aurora Climbing
+October 2, 2021
+The app has a powerful tagging feature for this purpose. Most user's create at least a projects tag. When you're looking at a climb, tap the tag button at the top of the screen. You can create, add, remove, and edit tags. Then you can use the advanced search features to filter for climbs with certain tags.
+
+A Google user
+April 21, 2019
+Yes, the last version updates shapes of hold, that's great!
+Did you find this helpful?
+
+Daniel Bennett-Waters
+August 1, 2022
+Unable to connect to board on android 12, S20 FE. Location and nearby devices permissions allowed. iOS users seems unaffected
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+August 1, 2022
+Sometimes getting all the permissions correct on Android is difficult. There are thousands of people connecting to the LED kits with Android. Please send us an email and we can help. support@auroraclimbing.com
+
+Foster Jackman
+October 29, 2020
+Cool app. Wish you could delete routes & follow users who set routes though
+Did you find this helpful?
+Aurora Climbing
+October 29, 2020
+Thanks for your review. In recent versions of the app, you can delete the climbs that you have set. Following setters is on the wish list.
+
+A Google user
+August 27, 2019
+Really easy to use app, excellent customer service
+Did you find this helpful?
+
+A Google user
+December 19, 2019
+It would be great if this app provided a way to tag problems like you can on the iPhone
+Did you find this helpful?
+
+Adam Brawner
+May 25, 2022
+Occasionally has connection errors other than that fantastic
+Did you find this helpful?
+
+Jacky Lau
+January 24, 2023
+I wish there was a way to search for climbs by selecting holds
+2 people found this review helpful
+Did you find this helpful?
+
+Cassius Animus
+September 7, 2025
+Kilterboards amazing... the app is by far absolute garbage. 💯
+Did you find this helpful?
+
+Justin Greenidge
+January 10, 2024
+I press button. Lights go ✨boom✨. I climb route. Me happy 👍
+Did you find this helpful?
+
+Luke Robinson
+April 17, 2024
+UI is about 10 years behind the curve.
+Did you find this helpful?
+
+Joshua Joshua
+July 13, 2020
+Not compatible for Android.
+1 person found this review helpful
+Did you find this helpful?
+Aurora Climbing
+July 13, 2020
+Please send an email support@auroraclimbing.com and we will try to help solve your issue.
+
+local_degeneracy4
+April 22, 2025
+there is a limit to how many lights you can light up
+Did you find this helpful?
+
+Vladimir Zakharov
+December 8, 2023
+When regestering an alert comes: couldn't create new account.
+Did you find this helpful?
+Aurora Climbing
+December 8, 2023
+Please send an email to support@auroraclimbing.com so we can help.
+
+Nikolay Kovshov
+January 28, 2025
+This app UX is so bad I can't even focus on exact recommendations
+1 person found this review helpful
+Did you find this helpful?
+
+Svibor Hatzivelkos
+November 11, 2024
+great way for knowing your climbing level
+Did you find this helpful?
+
+First Last
+January 16, 2023
+Sooooo much better than the tension board app
+Did you find this helpful?
+
+bob squireshire
+August 10, 2025
+slow nothing innovative, non-existent filters.
+Did you find this helpful?
+Aurora Climbing
+August 10, 2025
+There is an extensive set of filters. Go into the boards section of the app and look at list of climbs. There is a filter button.
+
+Khanh Nguyen
+December 10, 2023
+Slow,very bad user experience
+Did you find this helpful?
+
+joeys 332
+January 9, 2023
+Doesn't work
+
+FROM REDDIT
+
+
+Quick log ascent that make every climb the grade that the setter put. Very convenient as a climber but it’s one of the reason that make grades all over the place
+
+
+I see 2 problems with kilters system.
+
+Is the problem a user previously stated - quick logs confirm the grade. You can easily see this with very obvious soft climbs but there's hardly any deviation from the assigned grade. If you look at moon or tension, the community submitted grades are generally more wide in deviation because you need put in extra effort to submit a grade.
+
+Community submitted grades don't change the assigned grade. I think a system similar to stokt works better for the kilter since it doesn't have a moderation team like moon. The downside is that boulders tend to get sandbagged, but kilter is already super soft so it evens out.
+
+
+The UI is messy and could use an overhaul. Also the app is relatively laggy and slow at times.
+
+It really needs benchmarks. And like others said, disconnect the quick log from a vote on the grade.
+
+Why do I need to pick my gym to even connect to the board or see climbs? Seems pretty odd unless there's some Bluetooth identification going on.
+
+Dear God please debounce searching like what the fuck. Why does every character press while I'm typing trigger a search and lag my phone while searching 10k climbs in memory. Please debounce it so that it searches when I'm done typing
+
+Benchmarks.
+
+Ability to search and filter my own logbooks so I can see which climbs I've done of a certain grade and when.
+
+
+Okay here is a massive one: the boards for kilter have many layouts (full ride, mainline, 7x10, 10x10, 12x12, homewall vs gym).
+
+It would be REALLY cool if you could sort by popularity for specific layouts. For example. Let’s say you have all the holds on your gym/home wall. If you sort by popularity it will often show the most popular routes being the smaller holds packs (because it’s cheaper so more people/gyms purchase). So you get a route that does not utilize all the holds you have, but instead a lesser setup.
+
+When you pay more money for more holds, you want the routes to use them all. Would be really cool to sort for routes using the full extent of holds pack that you/your gym have.
+
+
+When you look at the graph of all of your sends you cant click on the bar chart to drill into specifics grades.
+The list of climbs is sorted only by date so if you want to find something specific you need to scroll until you find what you want by date descending. Would be helping to be able to sort the breakdown in the graph or list by other methods.
+
+
+Tabs could probably be condensed to notifications, boards and profile. Kilter tab is pretty irrelevant unless they incentivize uploading videos and there is an opportunity for your climb to be on that tab. Online kilter competition or announcements
+
+Make it so you can find your liked climbs directly instead of adding filter.
+
+Search climbs of people you follow with a list filled of those you follow
+
+When sorting by least or most repeated, be able to set more or less than x ascents.
+
+Obviously fix grading system, literally everyone knows its bad.

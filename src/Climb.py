@@ -238,10 +238,11 @@ def main():
     board = load_board(db_path=db_path)
     board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
+    for i in range(100):
 
-    route = get_random_graded_route(db_path=db_path, grade=target_grade, board=board)
+        route = get_random_graded_route(db_path=db_path, grade=target_grade, board=board)
 
-    print_route_summary(route=route)
+        print_route_summary(route=route)
 
 if __name__ == "__main__":
     main()
