@@ -17,6 +17,15 @@ FOOTHOLDS = {
     1583, 1526, 1469, 1412, 1355, 1298, 1241, 1179, 1621, 1564, 1507, 1450, 1393, 1336, 1279, 1222, 1181, 1643, 1586, 1529, 1472, 1415, 1358, 1301, 1244, 1183, 1618, 1561, 1504, 1447, 1390, 1333,
     1276, 1219, 1185, 1646, 1589, 1532, 1475, 1418, 1361, 1304, 1247, 1187, 1615, 1558, 1501, 1444, 1387, 1330, 1273, 1216, 1189, 1649, 1592, 1535, 1478, 1421, 1364, 1307, 1250, 1191, 1612, 1555,
     1498, 1441, 1384, 1327, 1270, 1213, 1193, 1652, 1595, 1538, 1481, 1424, 1367, 1310, 1253, 1195, 1609, 1552, 1495, 1438, 1381, 1324, 1267, 1210, 1197}
+STAT_LIMITS = {
+    "avg_holds": (3, 20),
+    "avg_hand_holds": (1, 15),
+    "avg_foot_holds": (0, 15),
+    "avg_total_length": (20.0, 600.0),
+    "avg_move_size": (5.0, 100.0),
+    "avg_max_move": (10.0, 200.0),
+    "target_angle": (0, 90),
+}
 
 # Gets a specific climb from the database
 # TODO needs to get exact climb rather than a list of possible climbs with similar names
@@ -368,6 +377,7 @@ def is_valid_route(route: Route) -> bool:
         and len(route.finish_holds()) >= 1
     )
 
+# Scores a route based off of route metrics
 def score_route(route: Route, target_stats: dict) -> float:
     if route.metrics is None:
         return -1e9
@@ -411,6 +421,7 @@ def score_route(route: Route, target_stats: dict) -> float:
 
     return score
 
+# Gets a sample of n routes and finds the average statistics on them
 def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30, layout_id: int = 1, target_angle: int = 40) -> dict:
 
     print(f"Generating {n} sample grade stats for grade {grade}, angle {target_angle}")
@@ -445,6 +456,97 @@ def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30,
         "avg_max_move": sum(r.metrics.max_move_size for r in routes) / n,
         "target_angle": target_angle
     }
+
+# Gets user defined stats
+def get_user_target_stats() -> dict:
+    print("Enter desired route characteristics:")
+
+    avg_holds = get_bounded_input(
+        "Total holds",
+        *STAT_LIMITS["avg_holds"],
+        cast_func=int
+    )
+
+    avg_hand_holds = get_bounded_input(
+        "Hand holds",
+        *STAT_LIMITS["avg_hand_holds"],
+        cast_func=int
+    )
+
+    avg_foot_holds = get_bounded_input(
+        "Foot holds",
+        *STAT_LIMITS["avg_foot_holds"],
+        cast_func=int
+    )
+
+    # extra logical check
+    while avg_hand_holds + avg_foot_holds > avg_holds:
+        print("Hand holds + foot holds cannot be greater than total holds.")
+        avg_hand_holds = get_bounded_input(
+            "Hand holds",
+            *STAT_LIMITS["avg_hand_holds"],
+            cast_func=int
+        )
+        avg_foot_holds = get_bounded_input(
+            "Foot holds",
+            *STAT_LIMITS["avg_foot_holds"],
+            cast_func=int
+        )
+
+    avg_total_length = get_bounded_input(
+        "Total length",
+        *STAT_LIMITS["avg_total_length"]
+    )
+
+    avg_move_size = get_bounded_input(
+        "Average move size",
+        *STAT_LIMITS["avg_move_size"]
+    )
+
+    avg_max_move = get_bounded_input(
+        "Max move size",
+        *STAT_LIMITS["avg_max_move"]
+    )
+
+    while avg_max_move < avg_move_size:
+        print("Max move size must be at least as large as average move size.")
+        avg_max_move = get_bounded_input(
+            "Max move size",
+            *STAT_LIMITS["avg_max_move"]
+        )
+
+    target_angle = get_bounded_input(
+        "Wall angle",
+        *STAT_LIMITS["target_angle"],
+        cast_func=int
+    )
+
+    return {
+        "avg_holds": avg_holds,
+        "avg_hand_holds": avg_hand_holds,
+        "avg_foot_holds": avg_foot_holds,
+        "avg_total_length": avg_total_length,
+        "avg_move_size": avg_move_size,
+        "avg_max_move": avg_max_move,
+        "target_angle": target_angle,
+    }
+
+#Stops user from inputting invalid stats
+def get_bounded_input(prompt: str, min_val: float, max_val: float, cast_func=float):
+    while True:
+        raw = input(f"{prompt} [{min_val} - {max_val}]: ").strip()
+
+        try:
+            value = cast_func(raw)
+        except ValueError:
+            print("Please enter a valid number.")
+            continue
+
+        if value < min_val or value > max_val:
+            print(f"Value must be between {min_val} and {max_val}.")
+            continue
+
+        return value
 
 # Evaluate the fitness function
 def evaluate_fitness_across_grades(db_path, board):
@@ -501,7 +603,8 @@ def main():
     # grades, scores = evaluate_fitness_across_grades(db_path, board)
     # plot_fitness(grades, scores)
 
-    target_stats = sample_grade_stats(db_path, board, target_grade, n=15)
+    # target_stats = sample_grade_stats(db_path=db_path, board=board, target_grade=target_grade, n=15)
+    target_stats = get_user_target_stats()
 
     print("\nTarget stats:")
     for k, v in target_stats.items():
@@ -525,9 +628,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# lowest/highest possible number for all stats - to use as thresholds
-# Verify route - verify stats dna vs difficulty
-
 
 # Python fast API - react
