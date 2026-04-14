@@ -37,7 +37,7 @@ def generate_route(grade: str = "V5", angle: int = 40):
         db_path=DB_PATH,
         board=board,
         grade=grade,
-        n=15,
+        n=3,
         target_angle=angle
     )
 
