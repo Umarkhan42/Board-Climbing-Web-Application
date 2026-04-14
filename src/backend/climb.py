@@ -6,9 +6,11 @@ import numpy as np
 import pprint
 import boardlib
 from PIL import Image, ImageDraw
+
 from boardgraph import HoldNode, MoveEdge, BoardGraph
 from routegraph import RouteHold, Route, RouteDNA
 import matplotlib.pyplot as plt
+
 
 ROLES = {12: "START", 13: "MIDDLE", 14:"FINISH", 15:"FOOT-ONLY"}
 FOOTHOLDS = {
@@ -558,7 +560,7 @@ def evaluate_fitness_across_grades(db_path, board):
         print(f"Evaluating {grade}...")
 
         # Get target stats for this grade
-        target_stats = sample_grade_stats(db_path, board, grade, n=500)
+        target_stats = sample_grade_stats(db_path, board, grade, n=50)
 
         scores = []
 
