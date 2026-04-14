@@ -8,6 +8,7 @@ import boardlib
 from PIL import Image, ImageDraw
 from boardgraph import HoldNode, MoveEdge, BoardGraph
 from routegraph import RouteHold, Route, RouteDNA
+import matplotlib.pyplot as plt
 
 ROLES = {12: "START", 13: "MIDDLE", 14:"FINISH", 15:"FOOT-ONLY"}
 FOOTHOLDS = {
@@ -28,6 +29,7 @@ def get_climb(db_path: str, name: str):
     SELECT 
         c.*,
         cs.display_difficulty,
+        cs.angle AS stats_angle,
         dg.boulder_name AS grade
     FROM climbs c
     LEFT JOIN climb_stats cs
@@ -255,7 +257,7 @@ def dna_to_route(dna: RouteDNA, board: BoardGraph, grade: str = None, angle: int
 
 # Calculates the fitness of the route
 def calc_fitness(dna: RouteDNA, board: BoardGraph, target_stats: dict, target_grade: str = None) -> float:
-    route = dna_to_route(dna, board, grade=target_grade)
+    route = dna_to_route(dna,board,grade=target_grade,angle=target_stats["target_angle"])
     dna.fitness = score_route(route, target_stats)
     return dna.fitness
 
@@ -343,7 +345,7 @@ def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,p
 
     population.sort(key=lambda d: d.fitness, reverse=True)
     best_dna = population[0]
-    best_route = dna_to_route(best_dna, board, grade=target_grade)
+    best_route = dna_to_route(best_dna, board, grade=target_grade, angle=target_stats["target_angle"])
 
     return best_dna, best_route
 
@@ -379,10 +381,20 @@ def score_route(route: Route, target_stats: dict) -> float:
     score -= abs(route.metrics.average_move_size - target_stats["avg_move_size"]) * 0.1
     score -= abs(route.metrics.max_move_size - target_stats["avg_max_move"]) * 0.1
 
-    if len(route.start_holds()) < 1:
-        score -= 100
-    if len(route.finish_holds()) < 1:
-        score -= 100
+    if route.angle is not None:
+        angle_diff = abs(route.angle - target_stats["target_angle"])
+
+        if angle_diff <= 5:
+            score += 5
+        elif angle_diff <= 10:
+            score += 1
+        else:
+            score -= angle_diff * 0.5
+
+        if len(route.start_holds()) < 1:
+            score -= 100
+        if len(route.finish_holds()) < 1:
+            score -= 100
 
     starts = route.start_holds()
     finishes = route.finish_holds()
@@ -399,7 +411,10 @@ def score_route(route: Route, target_stats: dict) -> float:
 
     return score
 
-def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30, layout_id: int = 1) -> dict:
+def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30, layout_id: int = 1, target_angle: int = 40) -> dict:
+
+    print(f"Generating {n} sample grade stats for grade {grade}, angle {target_angle}")
+
     routes = []
 
     while len(routes) < n:
@@ -410,12 +425,16 @@ def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30,
             layout_id=layout_id
         )
 
-        print(f"Route {len(routes)+1} Summary\n")
+        if route.angle is None:
+            continue
 
-        print_route_summary(route)
+        if abs(route.angle - target_angle) > 5:
+            continue
 
         if is_valid_route(route):
             routes.append(route)
+        
+        print_route_summary(route=route)
 
     return {
         "avg_holds": sum(r.metrics.total_holds for r in routes) / n,
@@ -424,7 +443,53 @@ def sample_grade_stats(db_path: str, board: BoardGraph, grade: str, n: int = 30,
         "avg_total_length": sum(r.metrics.total_length for r in routes) / n,
         "avg_move_size": sum(r.metrics.average_move_size for r in routes) / n,
         "avg_max_move": sum(r.metrics.max_move_size for r in routes) / n,
+        "target_angle": target_angle
     }
+
+# Evaluate the fitness function
+def evaluate_fitness_across_grades(db_path, board):
+    grades = ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10"]
+
+    avg_scores = []
+
+    for grade in grades:
+        print(f"Evaluating {grade}...")
+
+        # Get target stats for this grade
+        target_stats = sample_grade_stats(db_path, board, grade, n=500)
+
+        scores = []
+
+        # Sample routes and score them
+        for _ in range(50):
+            try:
+                route = get_random_graded_route(db_path, grade, board)
+                score = score_route(route, target_stats)
+                scores.append(score)
+            except:
+                continue  # skip broken routes
+
+        if scores:
+            avg_score = sum(scores) / len(scores)
+        else:
+            avg_score = 0
+
+        avg_scores.append(avg_score)
+
+        print(f"{grade}: avg score = {avg_score:.2f}")
+
+    return grades, avg_scores
+
+def plot_fitness(grades, scores):
+    plt.figure()
+    plt.plot(grades, scores, marker='o')
+
+    plt.xlabel("Grade")
+    plt.ylabel("Average Fitness Score")
+    plt.title("Fitness Score vs Climbing Grade")
+
+    plt.grid()
+    plt.show()
 
 def main():
     db_path = "kilter.db"
@@ -433,9 +498,10 @@ def main():
     board = load_board(db_path=db_path)
     board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
-    print(board)
+    # grades, scores = evaluate_fitness_across_grades(db_path, board)
+    # plot_fitness(grades, scores)
 
-    target_stats = sample_grade_stats(db_path, board, target_grade, n=10)
+    target_stats = sample_grade_stats(db_path, board, target_grade, n=15)
 
     print("\nTarget stats:")
     for k, v in target_stats.items():
@@ -446,8 +512,8 @@ def main():
         board=board,
         target_grade=target_grade,
         target_stats=target_stats,
-        population_size=20,
-        generations=10,
+        population_size=30,
+        generations=200,
         mutation_rate=0.1
     )
 
@@ -459,3 +525,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# lowest/highest possible number for all stats - to use as thresholds
+# Verify route - verify stats dna vs difficulty
+
+
+# Python fast API - react
