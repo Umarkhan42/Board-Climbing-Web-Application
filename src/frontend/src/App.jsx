@@ -24,7 +24,15 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial", color: "white", background: "#0b0b0b", minHeight: "100vh" }}>
+    <div
+      style={{
+        padding: "2rem",
+        fontFamily: "Arial",
+        color: "white",
+        background: "#0b0b0b",
+        minHeight: "100vh",
+      }}
+    >
       <h1>Kilterboard Route Generator</h1>
 
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
@@ -55,7 +63,9 @@ export default function App() {
         </div>
       )}
 
-      <BoardView holds={route?.holds ?? []} />
+      <div style={{ width: "100%", maxWidth: "1000px" }}>
+        <BoardView holds={route?.holds ?? []} />
+      </div>
     </div>
   );
 }
