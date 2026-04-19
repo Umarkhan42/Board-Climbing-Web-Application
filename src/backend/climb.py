@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pprint
 import boardlib
+import math
 from PIL import Image, ImageDraw
 
 from boardgraph import HoldNode, MoveEdge, BoardGraph
@@ -186,8 +187,13 @@ def get_random_graded_route(db_path: str, grade: str, board: BoardGraph, layout_
     climb = dict(row)
     return build_route_from_climb(db_path=db_path, climb=climb, board=board)
 
+#TODO
+def get_random_route(board: BoardGraph, number_of_holds=None) -> Route:
+    pass
+
 # Prints a summary of the route 
 def print_route_summary(route: Route):
+
     print(f"Name: {route.name}")
     print(f"Grade: {route.grade}")
     print(f"Angle: {route.angle}")
@@ -266,6 +272,26 @@ def dna_to_route(dna: RouteDNA, board: BoardGraph, grade: str = None, angle: int
     route.compute_metrics(board)
     return route
 
+def average_position(hole_ids, board: BoardGraph):
+    if not hole_ids:
+        return None
+
+    xs = [board.get_node(h).x for h in hole_ids]
+    ys = [board.get_node(h).y for h in hole_ids]
+    return (sum(xs) / len(xs), sum(ys) / len(ys))
+
+def route_line_from_dna(dna: RouteDNA, board: BoardGraph):
+    start_pos = average_position(dna.start_holds, board)
+    finish_pos = average_position(dna.finish_holds, board)
+
+    if start_pos is None or finish_pos is None:
+        return None
+
+    return (*start_pos, *finish_pos)
+
+def unique_preserve_order(items):
+    return list(dict.fromkeys(items))
+
 # Calculates the fitness of the route
 def calc_fitness(dna: RouteDNA, board: BoardGraph, target_stats: dict, target_grade: str = None) -> float:
     route = dna_to_route(dna,board,grade=target_grade,angle=target_stats["target_angle"])
@@ -273,53 +299,206 @@ def calc_fitness(dna: RouteDNA, board: BoardGraph, target_stats: dict, target_gr
     return dna.fitness
 
 # Given 2 DNAs, merge them to create a child DNA 
-def crossover(a: RouteDNA, b: RouteDNA) -> RouteDNA:
-    hand_mid = random.randint(0, min(len(a.hand_holds), len(b.hand_holds)))
-    foot_mid = random.randint(0, min(len(a.foot_holds), len(b.foot_holds)))
+def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
+    # choose starts / finishes from parents
+    child_start = random.choice([a.start_holds[:], b.start_holds[:]])
+    child_finish = random.choice([a.finish_holds[:], b.finish_holds[:]])
 
-    child = RouteDNA(
-        start_holds=a.start_holds[:1] + b.start_holds[1:],
-        hand_holds=a.hand_holds[:hand_mid] + b.hand_holds[hand_mid:],
-        finish_holds=b.finish_holds[:] if b.finish_holds else a.finish_holds[:],
-        foot_holds=a.foot_holds[:foot_mid] + b.foot_holds[foot_mid:]
+    # fallback if empty
+    if not child_start:
+        child_start = a.start_holds[:] if a.start_holds else b.start_holds[:]
+    if not child_finish:
+        child_finish = a.finish_holds[:] if a.finish_holds else b.finish_holds[:]
+
+    temp_child = RouteDNA(
+        start_holds=unique_preserve_order(child_start),
+        hand_holds=[],
+        finish_holds=unique_preserve_order(child_finish),
+        foot_holds=[],
     )
 
-    child.start_holds = list(dict.fromkeys(child.start_holds))
-    child.hand_holds = list(dict.fromkeys(child.hand_holds))
-    child.finish_holds = list(dict.fromkeys(child.finish_holds))
-    child.foot_holds = list(dict.fromkeys(child.foot_holds))
+    line = route_line_from_dna(temp_child, board)
+
+    used = set(temp_child.start_holds + temp_child.finish_holds)
+
+    # combine middle hands from both parents
+    hand_pool = unique_preserve_order(a.hand_holds + b.hand_holds)
+    hand_pool = [h for h in hand_pool if h not in used]
+
+    target_hand_count = max(len(a.hand_holds), len(b.hand_holds))
+
+    if line is not None:
+        x1, y1, x2, y2 = line
+
+        hand_pool.sort(
+            key=lambda h: point_to_line_distance(
+                board.get_node(h).x,
+                board.get_node(h).y,
+                x1, y1, x2, y2
+            )
+        )
+
+    child_hands = hand_pool[:target_hand_count]
+    used.update(child_hands)
+
+    # combine feet from both parents
+    foot_pool = unique_preserve_order(a.foot_holds + b.foot_holds)
+    foot_pool = [h for h in foot_pool if h not in used]
+
+    hand_positions = [board.get_node(h) for h in temp_child.start_holds + child_hands + temp_child.finish_holds]
+
+    valid_feet = []
+    for h in foot_pool:
+        node = board.get_node(h)
+        if any(node.y >= hand.y and abs(node.x - hand.x) <= 150 for hand in hand_positions):
+            valid_feet.append(h)
+
+    target_foot_count = max(len(a.foot_holds), len(b.foot_holds))
+    child_feet = valid_feet[:target_foot_count]
+
+    child = RouteDNA(
+        start_holds=unique_preserve_order(temp_child.start_holds),
+        hand_holds=unique_preserve_order(child_hands),
+        finish_holds=unique_preserve_order(temp_child.finish_holds),
+        foot_holds=unique_preserve_order(child_feet),
+    )
 
     return child
 
 # Mutation
 def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
+    used = set(dna.start_holds + dna.hand_holds + dna.finish_holds + dna.foot_holds)
+
     hand_ids = list(board.hand_nodes)
     foot_ids = list(board.foot_nodes)
 
-    used = set(dna.start_holds + dna.hand_holds + dna.finish_holds + dna.foot_holds)
+    line = route_line_from_dna(dna, board)
 
-    for i in range(len(dna.hand_holds)):
+    # mutate start holds
+    for i in range(len(dna.start_holds)):
         if random.random() < mutation_rate:
-            candidates = [h for h in hand_ids if h not in used or h == dna.hand_holds[i]]
+            old = dna.start_holds[i]
+
+            candidates = []
+            for h in hand_ids:
+                if h in used and h != old:
+                    continue
+
+                node = board.get_node(h)
+
+                # starts should be low on board
+                if node.y < 650:
+                    continue
+
+                candidates.append(h)
+
             if candidates:
                 new_hole = random.choice(candidates)
-                used.discard(dna.hand_holds[i])
+                used.discard(old)
+                dna.start_holds[i] = new_hole
+                used.add(new_hole)
+
+    # mutate finish holds
+    for i in range(len(dna.finish_holds)):
+        if random.random() < mutation_rate:
+            old = dna.finish_holds[i]
+
+            candidates = []
+            for h in hand_ids:
+                if h in used and h != old:
+                    continue
+
+                node = board.get_node(h)
+
+                # finishes should be high
+                if node.y > 450:
+                    continue
+
+                candidates.append(h)
+
+            if candidates:
+                new_hole = random.choice(candidates)
+                used.discard(old)
+                dna.finish_holds[i] = new_hole
+                used.add(new_hole)
+
+    # recompute line after possible start/finish mutations
+    line = route_line_from_dna(dna, board)
+
+    # mutate middle hand holds
+    for i in range(len(dna.hand_holds)):
+        if random.random() < mutation_rate:
+            old = dna.hand_holds[i]
+
+            candidates = []
+            for h in hand_ids:
+                if h in used and h != old:
+                    continue
+
+                node = board.get_node(h)
+
+                # avoid handholds below starts
+                start_pos = average_position(dna.start_holds, board)
+                if start_pos is not None and node.y > start_pos[1] + 40:
+                    continue
+
+                # prefer holds near line
+                if line is not None:
+                    x1, y1, x2, y2 = line
+                    dist = point_to_line_distance(node.x, node.y, x1, y1, x2, y2)
+                    if dist > 180:
+                        continue
+
+                candidates.append(h)
+
+            if candidates:
+                # prefer closer-to-line candidates
+                if line is not None:
+                    x1, y1, x2, y2 = line
+                    candidates.sort(
+                        key=lambda h: point_to_line_distance(
+                            board.get_node(h).x,
+                            board.get_node(h).y,
+                            x1, y1, x2, y2
+                        )
+                    )
+                    top_k = candidates[:max(1, min(10, len(candidates)))]
+                    new_hole = random.choice(top_k)
+                else:
+                    new_hole = random.choice(candidates)
+
+                used.discard(old)
                 dna.hand_holds[i] = new_hole
                 used.add(new_hole)
 
+    # mutate foot holds
+    hand_positions = [board.get_node(h) for h in dna.start_holds + dna.hand_holds + dna.finish_holds]
+
     for i in range(len(dna.foot_holds)):
         if random.random() < mutation_rate:
-            candidates = [h for h in foot_ids if h not in used or h == dna.foot_holds[i]]
+            old = dna.foot_holds[i]
+
+            candidates = []
+            for h in foot_ids:
+                if h in used and h != old:
+                    continue
+
+                node = board.get_node(h)
+
+                # foot should be below at least one hand and reasonably near it
+                if any(node.y >= hand.y and abs(node.x - hand.x) <= 150 for hand in hand_positions):
+                    candidates.append(h)
+
             if candidates:
                 new_hole = random.choice(candidates)
-                used.discard(dna.foot_holds[i])
+                used.discard(old)
                 dna.foot_holds[i] = new_hole
                 used.add(new_hole)
 
-    dna.start_holds = list(dict.fromkeys(dna.start_holds))
-    dna.hand_holds = list(dict.fromkeys(dna.hand_holds))
-    dna.finish_holds = list(dict.fromkeys(dna.finish_holds))
-    dna.foot_holds = list(dict.fromkeys(dna.foot_holds))
+    dna.start_holds = unique_preserve_order(dna.start_holds)
+    dna.hand_holds = unique_preserve_order(dna.hand_holds)
+    dna.finish_holds = unique_preserve_order(dna.finish_holds)
+    dna.foot_holds = unique_preserve_order(dna.foot_holds)
 
 # Run the Genetic Algorithm
 def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,population_size: int = 20,generations: int = 10,mutation_rate: float = 0.1):
@@ -345,7 +524,7 @@ def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,p
             parent_a = random.choice(survivors)
             parent_b = random.choice(survivors)
 
-            child = crossover(parent_a, parent_b)
+            child = crossover(parent_a, parent_b, board)
             mutate(child, board, mutation_rate)
             children.append(child)
 
@@ -379,47 +558,145 @@ def is_valid_route(route: Route) -> bool:
         and len(route.finish_holds()) >= 1
     )
 
-# Scores a route based off of route metrics
+# Distance from a point to the route line
+def point_to_line_distance(px, py, x1, y1, x2, y2):
+    dx = x2 - x1
+    dy = y2 - y1
+
+    if dx == 0 and dy == 0:
+        return math.hypot(px - x1, py - y1)
+
+    t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)
+    t = max(0.0, min(1.0, t))
+
+    nearest_x = x1 + t * dx
+    nearest_y = y1 + t * dy
+
+    return math.hypot(px - nearest_x, py - nearest_y)
+
+# Used to determine the fitness of a route ie how close it is to the grade it was generated 
 def score_route(route: Route, target_stats: dict) -> float:
     if route.metrics is None:
         return -1e9
 
     score = 0.0
 
-    score -= abs(route.metrics.total_holds - target_stats["avg_holds"])
-    score -= abs(route.metrics.total_hand_holds - target_stats["avg_hand_holds"])
-    score -= abs(route.metrics.total_foot_holds - target_stats["avg_foot_holds"])
-    score -= abs(route.metrics.total_length - target_stats["avg_total_length"]) * 0.05
-    score -= abs(route.metrics.average_move_size - target_stats["avg_move_size"]) * 0.1
-    score -= abs(route.metrics.max_move_size - target_stats["avg_max_move"]) * 0.1
-
-    if route.angle is not None:
-        angle_diff = abs(route.angle - target_stats["target_angle"])
-
-        if angle_diff <= 5:
-            score += 5
-        elif angle_diff <= 10:
-            score += 1
-        else:
-            score -= angle_diff * 0.5
-
-        if len(route.start_holds()) < 1:
-            score -= 100
-        if len(route.finish_holds()) < 1:
-            score -= 100
-
     starts = route.start_holds()
     finishes = route.finish_holds()
-    if starts and finishes:
-        avg_start_y = sum(h.y for h in starts) / len(starts)
-        avg_finish_y = sum(h.y for h in finishes) / len(finishes)
-        if avg_finish_y > avg_start_y:
-            score += 20
-        else:
-            score -= 50
+    feet = route.foot_holds()
+    hands = [h for h in route.holds if h.role in ("START", "MIDDLE", "FINISH")]
+    middle_hands = route.middle_holds()
 
+    # hard validity checks
+    if len(starts) < 1:
+        score -= 25
+    if len(finishes) < 1:
+        score -= 25
     if len(route.used_hole_ids()) != len(route.holds):
-        score -= 50
+        score -= 15
+
+    if not starts or not finishes:
+        return score
+
+    # metric matching
+    score -= abs(route.metrics.total_holds - target_stats["avg_holds"]) * 0.8
+    score -= abs(route.metrics.total_hand_holds - target_stats["avg_hand_holds"]) * 0.8
+    score -= abs(route.metrics.total_foot_holds - target_stats["avg_foot_holds"]) * 0.8
+    score -= abs(route.metrics.total_length - target_stats["avg_total_length"]) * 0.02
+    score -= abs(route.metrics.average_move_size - target_stats["avg_move_size"]) * 0.04
+    score -= abs(route.metrics.max_move_size - target_stats["avg_max_move"]) * 0.04
+
+    # angle
+    if route.angle is not None:
+        angle_diff = abs(route.angle - target_stats["target_angle"])
+        score -= angle_diff * 0.12
+    else:
+        score -= 2
+
+    avg_start_x = sum(h.x for h in starts) / len(starts)
+    avg_start_y = sum(h.y for h in starts) / len(starts)
+    avg_finish_x = sum(h.x for h in finishes) / len(finishes)
+    avg_finish_y = sum(h.y for h in finishes) / len(finishes)
+
+    # starts should be low
+    # larger y = lower
+    if avg_start_y >= 700:
+        score += min(6, (avg_start_y - 700) * 0.02)
+    else:
+        score -= min(6, (700 - avg_start_y) * 0.02)
+
+    # finishes should be high
+    # smaller y = higher
+    if avg_finish_y <= 350:
+        score += min(6, (350 - avg_finish_y) * 0.02)
+    else:
+        score -= min(6, (avg_finish_y - 350) * 0.02)
+
+    # finish should be above start
+    vertical_progress = avg_start_y - avg_finish_y
+    if vertical_progress > 0:
+        score += min(10, vertical_progress * 0.025)
+    else:
+        score -= 12
+
+    # two starts should be close
+    if len(starts) == 2:
+        dx = starts[0].x - starts[1].x
+        dy = starts[0].y - starts[1].y
+        start_dist = math.hypot(dx, dy)
+
+        if start_dist <= 120:
+            score += 4
+        else:
+            score -= min(6, (start_dist - 120) * 0.03)
+
+    # route should have a "plan":
+    # middle hand holds should stay near the
+    # line between start and finish
+
+    if len(middle_hands) > 0:
+        line_distances = [
+            point_to_line_distance(
+                h.x, h.y,
+                avg_start_x, avg_start_y,
+                avg_finish_x, avg_finish_y
+            )
+            for h in middle_hands
+        ]
+
+        avg_line_distance = sum(line_distances) / len(line_distances)
+
+        # smaller is better
+        if avg_line_distance <= 80:
+            score += 6
+        elif avg_line_distance <= 160:
+            score += 2
+        else:
+            score -= (avg_line_distance - 160) * 0.03
+
+    # penalise hand holds below the start
+    # (excluding start holds themselves)
+
+    hands_below_start = [h for h in middle_hands + finishes if h.y > avg_start_y]
+
+    if hands_below_start:
+        below_penalty = sum((h.y - avg_start_y) for h in hands_below_start)
+        score -= min(10, below_penalty * 0.03)
+
+    # footholds should generally be below nearby hands
+    if feet and hands:
+        good_feet = 0
+
+        for foot in feet:
+            if any(
+                foot.y >= hand.y and abs(foot.x - hand.x) <= 150
+                for hand in hands
+            ):
+                good_feet += 1
+
+        foot_ratio = good_feet / len(feet)
+        score += foot_ratio * 5
+        score -= (1 - foot_ratio) * 3
 
     return score
 
@@ -602,33 +879,11 @@ def main():
     board = load_board(db_path=db_path)
     board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
-    # grades, scores = evaluate_fitness_across_grades(db_path, board)
-    # plot_fitness(grades, scores)
+    route = get_random_route(board=board)
+    route.compute_metrics(board=board)
 
-    # target_stats = sample_grade_stats(db_path=db_path, board=board, target_grade=target_grade, n=15)
-    target_stats = get_user_target_stats()
-
-    print("\nTarget stats:")
-    for k, v in target_stats.items():
-        print(f"{k}: {v:.2f}")
-
-    best_dna, best_route = run_ga(
-        db_path=db_path,
-        board=board,
-        target_grade=target_grade,
-        target_stats=target_stats,
-        population_size=30,
-        generations=200,
-        mutation_rate=0.1
-    )
-
-    print("\nBest DNA:")
-    print(best_dna)
-
-    print("\nBest generated route:")
-    print_route_summary(best_route)
+    print_route_summary(route=route)
+    print(route)
 
 if __name__ == "__main__":
     main()
-
-# Python fast API - react
