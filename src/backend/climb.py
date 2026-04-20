@@ -101,7 +101,10 @@ def load_board(db_path: str) -> BoardGraph:
     query = """
     SELECT id, x, y
     FROM holes
-    WHERE id BETWEEN 1133 AND 1656
+    WHERE 
+        (id BETWEEN 1073 AND 1395)
+        OR (id BETWEEN 1447 AND 1599)
+        OR (id BETWEEN 4681 AND 4845)
     """
 
     cur.execute(query)
@@ -298,13 +301,22 @@ def calc_fitness(dna: RouteDNA, board: BoardGraph, target_stats: dict, target_gr
     dna.fitness = score_route(route, target_stats)
     return dna.fitness
 
+def enforce_start_finish_order(dna: RouteDNA, board: BoardGraph):
+    if not dna.start_holds or not dna.finish_holds:
+        return
+
+    start_avg_y = sum(board.get_node(h).y for h in dna.start_holds) / len(dna.start_holds)
+    finish_avg_y = sum(board.get_node(h).y for h in dna.finish_holds) / len(dna.finish_holds)
+
+    # if starts are higher than finishes, swap them
+    if start_avg_y < finish_avg_y:
+        dna.start_holds, dna.finish_holds = dna.finish_holds, dna.start_holds
+
 # Given 2 DNAs, merge them to create a child DNA 
 def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
-    # choose starts / finishes from parents
     child_start = random.choice([a.start_holds[:], b.start_holds[:]])
     child_finish = random.choice([a.finish_holds[:], b.finish_holds[:]])
 
-    # fallback if empty
     if not child_start:
         child_start = a.start_holds[:] if a.start_holds else b.start_holds[:]
     if not child_finish:
@@ -317,11 +329,12 @@ def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
         foot_holds=[],
     )
 
-    line = route_line_from_dna(temp_child, board)
+    # make sure starts are below finishes
+    enforce_start_finish_order(temp_child, board)
 
+    line = route_line_from_dna(temp_child, board)
     used = set(temp_child.start_holds + temp_child.finish_holds)
 
-    # combine middle hands from both parents
     hand_pool = unique_preserve_order(a.hand_holds + b.hand_holds)
     hand_pool = [h for h in hand_pool if h not in used]
 
@@ -329,7 +342,6 @@ def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
 
     if line is not None:
         x1, y1, x2, y2 = line
-
         hand_pool.sort(
             key=lambda h: point_to_line_distance(
                 board.get_node(h).x,
@@ -341,11 +353,13 @@ def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
     child_hands = hand_pool[:target_hand_count]
     used.update(child_hands)
 
-    # combine feet from both parents
     foot_pool = unique_preserve_order(a.foot_holds + b.foot_holds)
     foot_pool = [h for h in foot_pool if h not in used]
 
-    hand_positions = [board.get_node(h) for h in temp_child.start_holds + child_hands + temp_child.finish_holds]
+    hand_positions = [
+        board.get_node(h)
+        for h in temp_child.start_holds + child_hands + temp_child.finish_holds
+    ]
 
     valid_feet = []
     for h in foot_pool:
@@ -363,6 +377,7 @@ def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
         foot_holds=unique_preserve_order(child_feet),
     )
 
+    enforce_start_finish_order(child, board)
     return child
 
 # Mutation
@@ -386,8 +401,8 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
 
                 node = board.get_node(h)
 
-                # starts should be low on board
-                if node.y < 650:
+                # starts should be LOWER on board
+                if node.y < 700:
                     continue
 
                 candidates.append(h)
@@ -410,8 +425,8 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
 
                 node = board.get_node(h)
 
-                # finishes should be high
-                if node.y > 450:
+                # finishes should be HIGHER on board
+                if node.y > 350:
                     continue
 
                 candidates.append(h)
@@ -422,7 +437,9 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
                 dna.finish_holds[i] = new_hole
                 used.add(new_hole)
 
-    # recompute line after possible start/finish mutations
+    # force correct order after mutating start/finish
+    enforce_start_finish_order(dna, board)
+
     line = route_line_from_dna(dna, board)
 
     # mutate middle hand holds
@@ -437,22 +454,26 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
 
                 node = board.get_node(h)
 
-                # avoid handholds below starts
                 start_pos = average_position(dna.start_holds, board)
+                finish_pos = average_position(dna.finish_holds, board)
+
+                # do not allow handholds below the starts
                 if start_pos is not None and node.y > start_pos[1] + 40:
                     continue
 
-                # prefer holds near line
+                # do not allow handholds above the finishes too much
+                if finish_pos is not None and node.y < finish_pos[1] - 40:
+                    continue
+
                 if line is not None:
                     x1, y1, x2, y2 = line
                     dist = point_to_line_distance(node.x, node.y, x1, y1, x2, y2)
-                    if dist > 180:
+                    if dist > 80:
                         continue
 
                 candidates.append(h)
 
             if candidates:
-                # prefer closer-to-line candidates
                 if line is not None:
                     x1, y1, x2, y2 = line
                     candidates.sort(
@@ -471,9 +492,9 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
                 dna.hand_holds[i] = new_hole
                 used.add(new_hole)
 
-    # mutate foot holds
     hand_positions = [board.get_node(h) for h in dna.start_holds + dna.hand_holds + dna.finish_holds]
 
+    # mutate foot holds
     for i in range(len(dna.foot_holds)):
         if random.random() < mutation_rate:
             old = dna.foot_holds[i]
@@ -485,8 +506,7 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
 
                 node = board.get_node(h)
 
-                # foot should be below at least one hand and reasonably near it
-                if any(node.y >= hand.y and abs(node.x - hand.x) <= 150 for hand in hand_positions):
+                if any(node.y >= hand.y and abs(node.x - hand.x) <= 80 for hand in hand_positions):
                     candidates.append(h)
 
             if candidates:
@@ -499,6 +519,9 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
     dna.hand_holds = unique_preserve_order(dna.hand_holds)
     dna.finish_holds = unique_preserve_order(dna.finish_holds)
     dna.foot_holds = unique_preserve_order(dna.foot_holds)
+    dna.start_holds, dna.finish_holds = dna.finish_holds, dna.finish_holds
+
+    enforce_start_finish_order(dna, board)
 
 # Run the Genetic Algorithm
 def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,population_size: int = 20,generations: int = 10,mutation_rate: float = 0.1):
