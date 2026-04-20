@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 
 ROLES = {12: "START", 13: "MIDDLE", 14:"FINISH", 15:"FOOT-ONLY"}
+#TODO ADD THE NEW FOOTHOLDS 16X12
 FOOTHOLDS = {
     1133, 1135, 1137, 1139, 1141, 1143, 1145, 1147, 1149, 1151, 1153, 1155, 1157, 1159, 1161, 1163, 1165, 1166, 1630, 1573, 1516, 1459, 1402, 1345, 1288, 1231, 1169, 1634, 1577, 1520, 1463, 1406, 
     1349, 1292, 1235, 1171, 1173, 1228, 1285, 1342, 1399, 1456, 1513, 1570, 1627, 1637, 1580, 1523, 1466, 1409, 1352, 1295, 1238, 1175, 1624, 1567, 1510, 1453, 1396, 1339, 1282, 1225, 1177, 1640,
@@ -312,6 +313,75 @@ def enforce_start_finish_order(dna: RouteDNA, board: BoardGraph):
     if start_avg_y < finish_avg_y:
         dna.start_holds, dna.finish_holds = dna.finish_holds, dna.start_holds
 
+# Some footholds are anomalies this function fixes that
+def fix_foot_holds(dna: RouteDNA, board: BoardGraph):
+    if not dna.foot_holds:
+        return
+
+    hand_ids = dna.start_holds + dna.hand_holds + dna.finish_holds
+    hand_nodes = [board.get_node(h) for h in hand_ids]
+
+    foot_ids = list(board.foot_nodes)
+    used = set(dna.start_holds + dna.hand_holds + dna.finish_holds + dna.foot_holds)
+
+    new_feet = []
+
+    # fix existing feet
+    for foot_id in dna.foot_holds:
+        node = board.get_node(foot_id)
+
+        valid = any(
+            node.y >= hand.y and abs(node.x - hand.x) <= 15
+            for hand in hand_nodes
+        )
+
+        if valid:
+            new_feet.append(foot_id)
+            continue
+
+        candidates = []
+        for h in foot_ids:
+            if h in used:
+                continue
+
+            cand = board.get_node(h)
+
+            if any(cand.y >= hand.y and abs(cand.x - hand.x) <= 15 for hand in hand_nodes):
+                candidates.append(h)
+
+        if candidates:
+            new_hole = random.choice(candidates)
+            new_feet.append(new_hole)
+            used.add(new_hole)
+        else:
+            new_feet.append(foot_id)
+
+    new_feet = unique_preserve_order(new_feet)
+
+    # add more feet if too few
+    target_feet = max(1, len(hand_ids) // 2)
+
+    if len(new_feet) < target_feet:
+        candidates = []
+        for h in foot_ids:
+            if h in used:
+                continue
+
+            node = board.get_node(h)
+
+            if any(node.y >= hand.y and abs(node.x - hand.x) <= 15 for hand in hand_nodes):
+                candidates.append(h)
+
+        random.shuffle(candidates)
+
+        needed = target_feet - len(new_feet)
+
+        for h in candidates[:needed]:
+            new_feet.append(h)
+            used.add(h)
+
+    dna.foot_holds = unique_preserve_order(new_feet)
+
 # Given 2 DNAs, merge them to create a child DNA 
 def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
     child_start = random.choice([a.start_holds[:], b.start_holds[:]])
@@ -549,6 +619,7 @@ def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,p
 
             child = crossover(parent_a, parent_b, board)
             mutate(child, board, mutation_rate)
+            fix_foot_holds(child, board)
             children.append(child)
 
         population = survivors + children
