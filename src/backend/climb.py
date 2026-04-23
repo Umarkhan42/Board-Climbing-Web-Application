@@ -1,12 +1,7 @@
 import sqlite3
-import re
 import random
-from copy import deepcopy
 import numpy as np
-import pprint
-import boardlib
 import math
-from PIL import Image, ImageDraw
 
 from boardgraph import HoldNode, MoveEdge, BoardGraph
 from routegraph import RouteHold, Route, RouteDNA
@@ -65,7 +60,7 @@ def get_hold_position(db_path, placement_id, role_id=None):
 
     query = """
     SELECT 
-        placements.hole_id,   -- <== added
+        placements.hole_id,
         holes.x,
         holes.y
     FROM placements
@@ -608,7 +603,7 @@ def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,p
             calc_fitness(dna, board, target_stats, target_grade)
 
         population.sort(key=lambda d: d.fitness, reverse=True)
-        print(f"Generation {gen}: best fitness = {population[0].fitness:.2f}")
+        print(f"Generation {gen}: best fitness = {population[0].fitness:.6f}")
 
         survivors = population[: population_size // 2]
 
@@ -904,7 +899,7 @@ def get_user_target_stats() -> dict:
         "target_angle": target_angle,
     }
 
-#Stops user from inputting invalid stats
+# Stops user from inputting invalid stats
 def get_bounded_input(prompt: str, min_val: float, max_val: float, cast_func=float):
     while True:
         raw = input(f"{prompt} [{min_val} - {max_val}]: ").strip()
