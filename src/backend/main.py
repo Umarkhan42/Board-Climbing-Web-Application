@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import json
 
-from climb import load_board, sample_grade_stats, run_ga
+from climb import load_board, sample_grade_stats, run_ga, get_climb, build_route_from_climb
 
 app = FastAPI()
 
@@ -141,6 +141,41 @@ def generate(grade: str = "V5", angle: int = 40):
         ],
     }
 
+@app.get("/search-climbs")
+def search_climbs(name: str):
+    board = load_board(DB_PATH)
+
+    climbs = get_climb(DB_PATH, name)
+
+    results = []
+
+    for climb in climbs:
+        try:
+            route = build_route_from_climb(DB_PATH, climb, board)
+
+            results.append({
+                "name": route.name,
+                "grade": route.grade,
+                "angle": route.angle,
+                "author": route.author,
+                "holds": [
+                    {
+                        "hole_id": h.hole_id,
+                        "role": h.role,
+                        "x": h.x,
+                        "y": h.y,
+                    }
+                    for h in route.holds
+                ],
+            })
+        except Exception as e:
+            print("Failed to build climb:", climb.get("name"), e)
+
+    return {
+        "query": name,
+        "count": len(results),
+        "climbs": results,
+    }
 
 @app.post("/save-climb")
 def save_climb(data: dict, user=Depends(get_current_user)):
