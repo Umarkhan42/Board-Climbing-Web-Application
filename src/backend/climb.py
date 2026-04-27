@@ -190,6 +190,10 @@ def get_random_graded_route(db_path: str, grade: str, board: BoardGraph, layout_
 def get_random_route(board: BoardGraph, number_of_holds=None) -> Route:
     pass
 
+# Checks if the route is an only hand hold route
+def is_campus_route(route: Route) -> bool:
+    return route.metrics.total_foot_holds != 0
+
 # Prints a summary of the route 
 def print_route_summary(route: Route):
 
@@ -633,8 +637,13 @@ def initial_dna_population(db_path: str, board: BoardGraph, grade: str, size: in
     population = []
 
     for _ in range(size):
-        route = get_random_graded_route(db_path=db_path, grade=grade, board=board)
-        population.append(route_to_dna(route))
+        while True:
+            route = get_random_graded_route(db_path=db_path, grade=grade, board=board)
+            if is_campus_route(route):
+                continue
+            else:
+                population.append(route_to_dna(route))
+                break
 
     return population
 
