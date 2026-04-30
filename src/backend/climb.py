@@ -47,8 +47,14 @@ STAT_LIMITS = {
     "target_angle": (0, 90),
 }
 
-# Gets a specific climb from the database
-# TODO needs to get exact climb rather than a list of possible climbs with similar names
+# Share routes - image
+# Like route - popularity
+
+
+# improvements:
+# set route
+
+# Gets a list of climbs given a name from the database
 def get_climb(db_path: str, name: str):
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -68,7 +74,7 @@ def get_climb(db_path: str, name: str):
     WHERE c.name LIKE ?
     """
 
-    cur.execute(query, (name,))
+    cur.execute(query, (f"%{name}%",))
     rows = cur.fetchall()
     conn.close()
 

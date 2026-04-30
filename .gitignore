@@ -1,4 +1,5 @@
 __pycache__/
+report.tex
 *.db
 *.sqlite
 *.sqlite3

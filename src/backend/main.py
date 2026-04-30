@@ -20,12 +20,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 DB_PATH = BASE_DIR / "kilter.db"
 USERS_DB = BASE_DIR / "users.db"
+BOARD = load_board(DB_PATH)
+BOARD.build_edges(max_hand_distance=180, max_foot_distance=90)
 
 def get_users_conn():
     conn = sqlite3.connect(USERS_DB)
     conn.row_factory = sqlite3.Row
     return conn
 
+def route_to_dict(route):
+    return {
+        "name": route.name,
+        "grade": route.grade,
+        "angle": route.angle,
+        "holds": [
+            {
+                "hole_id": h.hole_id,
+                "role": h.role,
+                "x": h.x,
+                "y": h.y,
+            }
+            for h in route.holds
+        ],
+    }
 
 def get_current_user(x_user_email: str = Header(None)):
     if not x_user_email:
@@ -42,7 +59,6 @@ def get_current_user(x_user_email: str = Header(None)):
         raise HTTPException(status_code=401, detail="User not found")
 
     return dict(user)
-
 
 @app.post("/register")
 def register(data: dict):
@@ -78,7 +94,6 @@ def register(data: dict):
         "user": user,
     }
 
-
 @app.post("/login")
 def login(data: dict):
     email = data.get("email")
@@ -102,15 +117,12 @@ def login(data: dict):
         "user": dict(user),
     }
 
-
 @app.get("/generate")
 def generate(grade: str = "V5", angle: int = 40):
-    board = load_board(DB_PATH)
-    board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
     target_stats = sample_grade_stats(
         db_path=DB_PATH,
-        board=board,
+        board=BOARD,
         grade=grade,
         n=10,
         target_angle=angle,
@@ -118,7 +130,7 @@ def generate(grade: str = "V5", angle: int = 40):
 
     best_dna, best_route = run_ga(
         db_path=DB_PATH,
-        board=board,
+        board=BOARD,
         target_grade=grade,
         target_stats=target_stats,
         population_size=30,
@@ -177,6 +189,32 @@ def search_climbs(name: str):
         "climbs": results,
     }
 
+@app.post("/load-climbs")
+def load_climb(data: dict):
+    uuid = data.get("uuid")
+    name = data.get("name")
+
+    if not uuid and not name:
+        raise HTTPException(status_code=400, detail="uuid or name is required")
+
+    climbs = get_climb(DB_PATH, name or "%")
+
+    if uuid:
+        climb = next((c for c in climbs if c["uuid"] == uuid), None)
+    else:
+        climb = climbs[0] if climbs else None
+
+    if climb is None:
+        raise HTTPException(status_code=404, detail="Climb not found")
+
+    route = build_route_from_climb(
+        db_path=DB_PATH,
+        climb=climb,
+        board=BOARD
+    )
+
+    return route_to_dict(route)
+
 @app.post("/save-climb")
 def save_climb(data: dict, user=Depends(get_current_user)):
     climb_name = data.get("name", "generated")
@@ -213,7 +251,6 @@ def save_climb(data: dict, user=Depends(get_current_user)):
         "message": "Climb saved",
         "climb_id": climb_id,
     }
-
 
 @app.get("/my-climbs")
 def my_climbs(user=Depends(get_current_user)):

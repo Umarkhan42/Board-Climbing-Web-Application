@@ -1,134 +1,32 @@
 import { useState } from "react";
 import BoardView from "./BoardView";
 
-const API_URL = "http://127.0.0.1:8000";
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #050505 0%, #111827 100%)",
-    color: "white",
-    fontFamily: "Inter, Arial, sans-serif",
-    padding: "2rem",
-  },
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-  },
-  header: {
-    marginBottom: "1.5rem",
-  },
-  title: {
-    fontSize: "2.2rem",
-    margin: 0,
-  },
-  subtitle: {
-    color: "#9ca3af",
-    marginTop: "0.4rem",
-  },
-  tabs: {
-    display: "flex",
-    gap: "0.75rem",
-    marginBottom: "1.5rem",
-    flexWrap: "wrap",
-  },
-  tab: {
-    padding: "0.75rem 1rem",
-    borderRadius: "999px",
-    border: "1px solid #374151",
-    color: "white",
-    cursor: "pointer",
-  },
-  card: {
-    background: "rgba(17, 24, 39, 0.9)",
-    border: "1px solid #1f2937",
-    borderRadius: "18px",
-    padding: "1.25rem",
-    marginBottom: "1.25rem",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-  },
-  row: {
-    display: "flex",
-    gap: "1rem",
-    flexWrap: "wrap",
-    alignItems: "end",
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-  },
-  label: {
-    color: "#d1d5db",
-    fontSize: "0.9rem",
-  },
-  input: {
-    background: "#020617",
-    border: "1px solid #374151",
-    color: "white",
-    borderRadius: "10px",
-    padding: "0.7rem 0.8rem",
-    outline: "none",
-  },
-  button: {
-    background: "#2563eb",
-    border: "none",
-    color: "white",
-    borderRadius: "10px",
-    padding: "0.75rem 1rem",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  secondaryButton: {
-    background: "#1f2937",
-    border: "1px solid #374151",
-    color: "white",
-    borderRadius: "10px",
-    padding: "0.75rem 1rem",
-    cursor: "pointer",
-  },
-  message: {
-    color: "#93c5fd",
-    marginBottom: "1rem",
-  },
-  boardWrap: {
-    width: "100%",
-    maxWidth: "1000px",
-    margin: "0 auto",
-  },
-};
+const API = "http://127.0.0.1:8000";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("generate");
 
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
+
   const [grade, setGrade] = useState("V5");
   const [angle, setAngle] = useState(40);
   const [route, setRoute] = useState(null);
+
   const [loading, setLoading] = useState(false);
-  const [searchName, setSearchName] = useState("");
-  const [databaseClimbs, setDatabaseClimbs] = useState([]);
-  const [savedClimbs, setSavedClimbs] = useState([]);
   const [message, setMessage] = useState("");
 
-  const tabButton = (id, label) => (
-    <button
-      onClick={() => setActiveTab(id)}
-      style={{
-        ...styles.tab,
-        background: activeTab === id ? "#2563eb" : "#111827",
-      }}
-    >
-      {label}
-    </button>
-  );
+  const [savedClimbs, setSavedClimbs] = useState([]);
+
+  const [searchName, setSearchName] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const handleRegister = async () => {
     setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/register`, {
+      const res = await fetch(`${API}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name: email.split("@")[0] }),
@@ -143,7 +41,8 @@ export default function App() {
 
       setUser(data.user);
       setMessage("Registered and logged in");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage("Register error");
     }
   };
@@ -152,7 +51,7 @@ export default function App() {
     setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/login`, {
+      const res = await fetch(`${API}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -167,7 +66,8 @@ export default function App() {
 
       setUser(data.user);
       setMessage("Logged in successfully");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage("Login error");
     }
   };
@@ -182,11 +82,22 @@ export default function App() {
     setLoading(true);
     setMessage("");
 
+    console.log("sending generate request:", { grade, angle });
+
     try {
-      const res = await fetch(`${API_URL}/generate?grade=${grade}&angle=${angle}`);
+      const res = await fetch(`${API}/generate?grade=${grade}&angle=${angle}`);
       const data = await res.json();
+
+      console.log("generate response:", data);
+
+      if (!res.ok) {
+        setMessage(data.detail || "Failed to generate route");
+        return;
+      }
+
       setRoute(data);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage("Failed to generate route");
     }
 
@@ -194,10 +105,15 @@ export default function App() {
   };
 
   const saveClimb = async () => {
-    if (!route || !user) return;
+    if (!route || !user) {
+      setMessage("Login first before saving climbs");
+      return;
+    }
+
+    setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/save-climb`, {
+      const res = await fetch(`${API}/save-climb`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -219,16 +135,22 @@ export default function App() {
       }
 
       setMessage("Climb saved successfully");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage("Save climb error");
     }
   };
 
   const loadMyClimbs = async () => {
-    if (!user) return;
+    if (!user) {
+      setMessage("Please login to view your climbs");
+      return;
+    }
+
+    setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/my-climbs`, {
+      const res = await fetch(`${API}/my-climbs`, {
         headers: { "X-User-Email": user.email },
       });
 
@@ -240,10 +162,73 @@ export default function App() {
       }
 
       setSavedClimbs(data.climbs || []);
-      setMessage("Loaded saved climbs");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage("Load climbs error");
     }
+  };
+
+  const searchDatabaseClimbs = async () => {
+    if (!searchName.trim()) {
+      setMessage("Enter a climb name to search");
+      return;
+    }
+
+    setSearchLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        `${API}/search-climbs?name=${encodeURIComponent(searchName)}`
+      );
+
+      const data = await res.json();
+
+      console.log("find climb response:", data);
+
+      if (!res.ok) {
+        setMessage(data.detail || "Search failed");
+        return;
+      }
+
+      setSearchResults(data.climbs || []);
+    } catch (err) {
+      console.error(err);
+      setMessage("Search error");
+    }
+
+    setSearchLoading(false);
+  };
+
+  const loadDatabaseClimb = async (climb) => {
+  setMessage("");
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/load-climbs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uuid: climb.uuid,
+        name: climb.name,
+      }),
+    });
+
+    const data = await res.json();
+    console.log("loaded database climb:", data);
+
+    if (!res.ok) {
+      setMessage(data.detail || "Failed to load climb");
+      return;
+    }
+
+    setRoute(data);
+    setMessage(`Loaded ${data.name}`);
+  } catch (err) {
+    console.error("load database climb error:", err);
+    setMessage("Failed to load database climb");
+  }
   };
 
   const loadSavedRoute = (climb) => {
@@ -254,106 +239,94 @@ export default function App() {
       holds: climb.holds,
     });
 
-    setActiveTab("generate");
     setMessage(`Loaded ${climb.climb_name}`);
-  };
-
-  const searchDatabaseClimbs = async () => {
-  if (!searchName.trim()) return;
-
-  setMessage("");
-
-  try {
-    const res = await fetch(
-      `${API_URL}/search-climbs?name=${encodeURIComponent(searchName)}`
-    );
-
-    const data = await res.json();
-    console.log("database climb search response:", data);
-
-    if (!res.ok) {
-      setMessage(data.detail || "Failed to search climbs");
-      return;
-    }
-
-    setDatabaseClimbs(data.climbs || []);
-    setMessage(`Found ${data.count} climb(s)`);
-  } catch (err) {
-    console.error("search climbs error:", err);
-    setMessage("Search climbs error");
-  }
-};
-
-  const loadDatabaseRoute = (climb) => {
-    setRoute({
-      name: climb.name,
-      grade: climb.grade,
-      angle: climb.angle,
-      holds: climb.holds,
-    });
-
-    setActiveTab("generate");
-    setMessage(`Loaded ${climb.name}`);
   };
 
   return (
     <div style={styles.page}>
-      <div style={styles.container}>
-        <div style={styles.header}>
+      <div style={styles.header}>
+        <div>
           <h1 style={styles.title}>Kilterboard Route Generator</h1>
-          <p style={styles.subtitle}>
-            Generate, save and explore board climbs.
-          </p>
+          <p style={styles.subtitle}>Generate, search and save board climbs</p>
         </div>
 
-        <div style={styles.tabs}>
-          {tabButton("generate", "Generate Climbs")}
-          {tabButton("find", "Find Climb")}
-          {tabButton("popular", "Popular Climbs")}
-        </div>
+        <div style={styles.loginBox}>
+          <input
+            style={styles.input}
+            type="email"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        {message && <div style={styles.message}>{message}</div>}
-
-        <div style={styles.card}>
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>Email</label>
-              <input
-                style={styles.input}
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <button style={styles.secondaryButton} onClick={handleRegister}>
-              Register
-            </button>
-
-            <button style={styles.secondaryButton} onClick={handleLogin}>
-              Login
-            </button>
-
-            {user && (
-              <button style={styles.secondaryButton} onClick={handleLogout}>
+          {!user ? (
+            <>
+              <button style={styles.button} onClick={handleLogin}>
+                Login
+              </button>
+              <button style={styles.secondaryButton} onClick={handleRegister}>
+                Register
+              </button>
+            </>
+          ) : (
+            <>
+              <span style={styles.userText}>{user.email}</span>
+              <button style={styles.dangerButton} onClick={handleLogout}>
                 Logout
               </button>
-            )}
-          </div>
-
-          {user && (
-            <p style={{ color: "#9ca3af", marginBottom: 0 }}>
-              Logged in as <b style={{ color: "white" }}>{user.email}</b>
-            </p>
+            </>
           )}
         </div>
+      </div>
 
-        {activeTab === "generate" && (
-          <>
+      <div style={styles.tabs}>
+        <button
+          style={activeTab === "generate" ? styles.activeTab : styles.tab}
+          onClick={() => setActiveTab("generate")}
+        >
+          Generate Climbs
+        </button>
+
+        <button
+          style={activeTab === "find" ? styles.activeTab : styles.tab}
+          onClick={() => setActiveTab("find")}
+        >
+          Find Climb
+        </button>
+
+        <button
+          style={activeTab === "popular" ? styles.activeTab : styles.tab}
+          onClick={() => setActiveTab("popular")}
+        >
+          Popular Climbs
+        </button>
+
+        <button
+          style={activeTab === "my" ? styles.activeTab : styles.tab}
+          onClick={() => {
+            if (!user) {
+              setMessage("Please login to view your climbs");
+              return;
+            }
+
+            setActiveTab("my");
+            loadMyClimbs();
+          }}
+        >
+          My Climbs
+        </button>
+      </div>
+
+      {message && <div style={styles.message}>{message}</div>}
+
+      <div style={styles.layout}>
+        <div style={styles.leftPanel}>
+          {activeTab === "generate" && (
             <div style={styles.card}>
-              <div style={styles.row}>
-                <div style={styles.field}>
+              <h2>Generate Climb</h2>
+
+              <div style={styles.formRow}>
+                <div>
                   <label style={styles.label}>Grade</label>
                   <input
                     style={styles.input}
@@ -362,7 +335,7 @@ export default function App() {
                   />
                 </div>
 
-                <div style={styles.field}>
+                <div>
                   <label style={styles.label}>Angle</label>
                   <input
                     style={styles.input}
@@ -371,91 +344,273 @@ export default function App() {
                     onChange={(e) => setAngle(Number(e.target.value))}
                   />
                 </div>
-
-                <button style={styles.button} onClick={generateRoute} disabled={loading}>
-                  {loading ? "Generating..." : "Generate Route"}
-                </button>
-
-                {user && route && (
-                  <button style={styles.secondaryButton} onClick={saveClimb}>
-                    Save Climb
-                  </button>
-                )}
               </div>
 
-              {route && (
-                <div style={{ marginTop: "1rem", color: "#d1d5db" }}>
-                  <p><b>Name:</b> {route.name}</p>
-                  <p><b>Grade:</b> {route.grade}</p>
-                  <p><b>Angle:</b> {route.angle}</p>
-                </div>
+              <button
+                style={styles.button}
+                onClick={generateRoute}
+                disabled={loading}
+              >
+                {loading ? "Generating..." : "Generate Route"}
+              </button>
+
+              {user && route && (
+                <button style={styles.secondaryButton} onClick={saveClimb}>
+                  Save Climb
+                </button>
               )}
             </div>
+          )}
 
+          {activeTab === "find" && (
             <div style={styles.card}>
-              <div style={styles.boardWrap}>
-                <BoardView holds={route?.holds ?? []} />
-              </div>
-            </div>
-          </>
-        )}
+              <h2>Find Climb in Database</h2>
 
-        {activeTab === "find" && (
-          <div style={styles.card}>
-            <h2>Find Climb in Database</h2>
-
-            <div style={styles.row}>
-              <div style={styles.field}>
-                <label style={styles.label}>Climb name</label>
+              <div style={styles.formRow}>
                 <input
                   style={styles.input}
-                  placeholder="Search climb name..."
+                  placeholder="Search climb name"
                   value={searchName}
                   onChange={(e) => setSearchName(e.target.value)}
                 />
+
+                <button
+                  style={styles.button}
+                  onClick={searchDatabaseClimbs}
+                  disabled={searchLoading}
+                >
+                  {searchLoading ? "Searching..." : "Search"}
+                </button>
               </div>
 
-              <button style={styles.button} onClick={searchDatabaseClimbs}>
-                Search
+              <div style={styles.results}>
+                {searchResults.map((climb) => (
+                  <div key={climb.uuid} style={styles.climbCard}>
+                    <p><b>Name:</b> {climb.name}</p>
+                    <p><b>Grade:</b> {climb.grade || "Unknown"}</p>
+                    <p><b>Angle:</b> {climb.angle || climb.stats_angle}</p>
+                    <p><b>Setter:</b> {climb.setter_username}</p>
+
+                    <button
+                      style={styles.secondaryButton}
+                      onClick={() => loadDatabaseClimb(climb)}
+                    >
+                      Load Climb
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "popular" && (
+            <div style={styles.card}>
+              <h2>Popular Climbs</h2>
+              <p style={styles.muted}>
+                This tab can later show most saved climbs, highest rated climbs,
+                or most generated climbs.
+              </p>
+            </div>
+          )}
+
+          {activeTab === "my" && (
+            <div style={styles.card}>
+              <h2>My Climbs</h2>
+
+              <button style={styles.button} onClick={loadMyClimbs}>
+                Refresh My Climbs
               </button>
+
+              {savedClimbs.length === 0 && (
+                <p style={styles.muted}>No saved climbs yet.</p>
+              )}
+
+              <div style={styles.results}>
+                {savedClimbs.map((climb) => (
+                  <div key={climb.id} style={styles.climbCard}>
+                    <p><b>Name:</b> {climb.climb_name}</p>
+                    <p><b>Grade:</b> {climb.grade}</p>
+                    <p><b>Angle:</b> {climb.angle}</p>
+                    <p><b>Created:</b> {climb.created_at}</p>
+
+                    <button
+                      style={styles.secondaryButton}
+                      onClick={() => loadSavedRoute(climb)}
+                    >
+                      Load Climb
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            <div style={{ marginTop: "1rem", display: "grid", gap: "0.75rem" }}>
-              {databaseClimbs.map((climb, index) => (
-                <div
-                  key={`${climb.name}-${index}`}
-                  style={{
-                    background: "#020617",
-                    border: "1px solid #1f2937",
-                    borderRadius: "12px",
-                    padding: "1rem",
-                  }}
-                >
-                  <p><b>Name:</b> {climb.name}</p>
-                  <p><b>Grade:</b> {climb.grade}</p>
-                  <p><b>Angle:</b> {climb.angle}</p>
-                  <p><b>Author:</b> {climb.author}</p>
-                  <p><b>Holds:</b> {climb.holds.length}</p>
-
-                  <button
-                    style={styles.secondaryButton}
-                    onClick={() => loadDatabaseRoute(climb)}
-                  >
-                    Load Climb
-                  </button>
-                </div>
-              ))}
+          {route && (
+            <div style={styles.card}>
+              <h2>Current Climb</h2>
+              <p><b>Name:</b> {route.name}</p>
+              <p><b>Grade:</b> {route.grade}</p>
+              <p><b>Angle:</b> {route.angle}</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {activeTab === "popular" && (
-          <div style={styles.card}>
-            <h2>Popular Climbs</h2>
-            <p style={{ color: "#9ca3af" }}>Popular climbs will go here later.</p>
-          </div>
-        )}
+        <div style={styles.boardPanel}>
+          <BoardView holds={route?.holds ?? []} />
+        </div>
       </div>
     </div>
   );
 }
+
+const styles = {
+  page: {
+  padding: "2rem",
+  fontFamily: "Arial",
+  color: "white",
+  background: "linear-gradient(135deg, #020617, #111827)",
+  minHeight: "100vh",
+  width: "100%",
+  margin: 0,
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: "1rem",
+    alignItems: "center",
+    marginBottom: "1.5rem",
+    flexWrap: "wrap",
+  },
+  title: {
+    margin: 0,
+    fontSize: "2rem",
+  },
+  subtitle: {
+    marginTop: "0.4rem",
+    color: "#94a3b8",
+  },
+  loginBox: {
+    display: "flex",
+    gap: "0.5rem",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  tabs: {
+    display: "flex",
+    gap: "0.75rem",
+    marginBottom: "1rem",
+    flexWrap: "wrap",
+  },
+  tab: {
+    padding: "0.75rem 1rem",
+    borderRadius: "999px",
+    border: "1px solid #334155",
+    background: "#0f172a",
+    color: "#cbd5e1",
+    cursor: "pointer",
+  },
+  activeTab: {
+    padding: "0.75rem 1rem",
+    borderRadius: "999px",
+    border: "1px solid #38bdf8",
+    background: "#0284c7",
+    color: "white",
+    cursor: "pointer",
+  },
+  layout: {
+    display: "grid",
+    gridTemplateColumns: "360px 1fr",
+    gap: "1.5rem",
+    alignItems: "start",
+  },
+  leftPanel: {
+    display: "grid",
+    gap: "1rem",
+  },
+  boardPanel: {
+    background: "#020617",
+    border: "1px solid #1e293b",
+    borderRadius: "18px",
+    padding: "1rem",
+  },
+  card: {
+    background: "rgba(15, 23, 42, 0.95)",
+    border: "1px solid #1e293b",
+    borderRadius: "18px",
+    padding: "1rem",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+  },
+  formRow: {
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+    marginBottom: "1rem",
+  },
+  label: {
+    display: "block",
+    marginBottom: "0.35rem",
+    color: "#cbd5e1",
+    fontSize: "0.9rem",
+  },
+  input: {
+    padding: "0.65rem 0.75rem",
+    borderRadius: "10px",
+    border: "1px solid #334155",
+    background: "#020617",
+    color: "white",
+    outline: "none",
+  },
+  button: {
+    padding: "0.65rem 1rem",
+    borderRadius: "10px",
+    border: "none",
+    background: "#22c55e",
+    color: "#052e16",
+    fontWeight: "bold",
+    cursor: "pointer",
+    marginRight: "0.5rem",
+  },
+  secondaryButton: {
+    padding: "0.65rem 1rem",
+    borderRadius: "10px",
+    border: "1px solid #334155",
+    background: "#1e293b",
+    color: "white",
+    cursor: "pointer",
+    marginRight: "0.5rem",
+  },
+  dangerButton: {
+    padding: "0.65rem 1rem",
+    borderRadius: "10px",
+    border: "none",
+    background: "#ef4444",
+    color: "white",
+    cursor: "pointer",
+  },
+  message: {
+    background: "#082f49",
+    color: "#bae6fd",
+    border: "1px solid #0369a1",
+    padding: "0.75rem 1rem",
+    borderRadius: "12px",
+    marginBottom: "1rem",
+  },
+  results: {
+    display: "grid",
+    gap: "0.75rem",
+    marginTop: "1rem",
+  },
+  climbCard: {
+    background: "#020617",
+    border: "1px solid #334155",
+    borderRadius: "14px",
+    padding: "1rem",
+  },
+  muted: {
+    color: "#94a3b8",
+  },
+  userText: {
+    color: "#93c5fd",
+    fontWeight: "bold",
+  },
+};
