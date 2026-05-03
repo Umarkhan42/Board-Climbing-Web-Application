@@ -775,6 +775,17 @@ def score_route(route: Route, target_stats: dict) -> float:
         else:
             score -= min(6, (start_dist - 120) * 0.03)
 
+    # two finishes should be close
+    if len(finishes) == 2:
+        dx = finishes[0].x - finishes[1].x
+        dy = finishes[0].y - finishes[1].y
+        finish_dist = math.hypot(dx, dy)
+
+        if finish_dist <= 120:
+            score += 4
+        else:
+            score -= min(6, (finish_dist - 120) * 0.03)
+
     # route should have a "plan":
     # middle hand holds should stay near the
     # line between start and finish
@@ -1004,11 +1015,9 @@ def main():
     board = load_board(db_path=db_path)
     board.build_edges(max_hand_distance=180, max_foot_distance=90)
 
-    route = get_random_route(board=board)
-    route.compute_metrics(board=board)
+    s = sample_grade_stats(board=board, grade=target_grade,db_path=db_path, target_angle=40)
 
-    print_route_summary(route=route)
-    print(route)
+    run_ga()
 
 if __name__ == "__main__":
     main()

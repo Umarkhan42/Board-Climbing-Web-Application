@@ -38,7 +38,7 @@ def get_database_routes(board):
 
     routes = []
 
-    while len(routes) < SAMPLES_PER_GRADE:
+    while len(routes) < SAMPLE_SIZE:
         grade = random.choice(GRADES)
 
         try:
@@ -62,7 +62,7 @@ def get_database_routes(board):
             routes.append(route)
 
             print(
-                f"Retrieved {len(routes)}/{SAMPLES_PER_GRADE} | "
+                f"Retrieved {len(routes)}/{SAMPLE_SIZE} | "
                 f"{route.name} | {route.grade} | angle={route.angle}"
             )
 
@@ -77,7 +77,7 @@ def get_generated_routes(board):
 
     routes = []
 
-    while len(routes) < SAMPLES_PER_GRADE:
+    while len(routes) < SAMPLE_SIZE:
         grade = random.choice(GRADES)
 
         try:
@@ -106,7 +106,7 @@ def get_generated_routes(board):
             routes.append(route)
 
             print(
-                f"Generated {len(routes)}/{SAMPLES_PER_GRADE} | "
+                f"Generated {len(routes)}/{SAMPLE_SIZE} | "
                 f"{route.grade} | fitness={best_dna.fitness:.2f}"
             )
 
