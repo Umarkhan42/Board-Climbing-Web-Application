@@ -405,11 +405,301 @@ export default function App() {
 
           {activeTab === "popular" && (
             <div style={styles.card}>
-              <h2>Popular Climbs</h2>
-              <p style={styles.muted}>
-                This tab can later show most saved climbs, highest rated climbs,
-                or most generated climbs.
-              </p>
+              <h2 style={{ marginTop: 0 }}>Popular Climbs</h2>
+
+              <div style={styles.results}>
+                {[
+                  {
+                    id: 1,
+                    name: "Moonlight",
+                    grade: "V5",
+                    angle: 40,
+                    setter: "Kilter",
+                    description: "Classic compression climb with powerful moves.",
+                    holds: [
+                            {
+                                "hole_id": 1148,
+                                "role": "FOOT-ONLY",
+                                "x": 80,
+                                "y": 8
+                            },
+                            {
+                                "hole_id": 1464,
+                                "role": "START",
+                                "x": 88,
+                                "y": 32
+                            },
+                            {
+                                "hole_id": 1511,
+                                "role": "START",
+                                "x": 96,
+                                "y": 48
+                            },
+                            {
+                                "hole_id": 1395,
+                                "role": "MIDDLE",
+                                "x": 64,
+                                "y": 56
+                            },
+                            {
+                                "hole_id": 1280,
+                                "role": "FOOT-ONLY",
+                                "x": 32,
+                                "y": 64
+                            },
+                            {
+                                "hole_id": 1391,
+                                "role": "MIDDLE",
+                                "x": 64,
+                                "y": 80
+                            },
+                            {
+                                "hole_id": 1305,
+                                "role": "MIDDLE",
+                                "x": 40,
+                                "y": 96
+                            },
+                            {
+                                "hole_id": 1386,
+                                "role": "FOOT-ONLY",
+                                "x": 64,
+                                "y": 104
+                            },
+                            {
+                                "hole_id": 1325,
+                                "role": "MIDDLE",
+                                "x": 48,
+                                "y": 128
+                            },
+                            {
+                                "hole_id": 1378,
+                                "role": "FINISH",
+                                "x": 64,
+                                "y": 152
+                            },
+                            {
+                                "hole_id": 1516,
+                                "role": "FOOT-ONLY",
+                                "x": 100,
+                                "y": 20
+                            },
+                            {
+                                "hole_id": 1456,
+                                "role": "FOOT-ONLY",
+                                "x": 84,
+                                "y": 36
+                            },
+                            {
+                                "hole_id": 1336,
+                                "role": "FOOT-ONLY",
+                                "x": 52,
+                                "y": 68
+                            }
+                        ],
+                  },
+                  {
+                    id: 2,
+                    name: "Red Tide",
+                    grade: "V7",
+                    angle: 45,
+                    setter: "Umar",
+                    description: "Big dynamic moves with difficult tension.",
+                    holds: [
+                        {
+                            "hole_id": 1148,
+                            "role": "FOOT-ONLY",
+                            "x": 80,
+                            "y": 8
+                        },
+                        {
+                            "hole_id": 1519,
+                            "role": "START",
+                            "x": 104,
+                            "y": 24
+                        },
+                        {
+                            "hole_id": 1508,
+                            "role": "MIDDLE",
+                            "x": 96,
+                            "y": 64
+                        },
+                        {
+                            "hole_id": 1392,
+                            "role": "MIDDLE",
+                            "x": 64,
+                            "y": 72
+                        },
+                        {
+                            "hole_id": 1551,
+                            "role": "FINISH",
+                            "x": 112,
+                            "y": 136
+                        },
+                        {
+                            "hole_id": 1137,
+                            "role": "FOOT-ONLY",
+                            "x": 124,
+                            "y": 4
+                        },
+                        {
+                            "hole_id": 1513,
+                            "role": "FOOT-ONLY",
+                            "x": 100,
+                            "y": 36
+                        },
+                        {
+                            "hole_id": 1561,
+                            "role": "FOOT-ONLY",
+                            "x": 116,
+                            "y": 84
+                        }
+                    ],
+                  },
+                  {
+                    id: 4,
+                    name: "Night Shift",
+                    grade: "V6",
+                    angle: 40,
+                    setter: "Kilter",
+                    description: "Power endurance route with long movement chains.",
+                    holds: [
+                            {
+                                "hole_id": 1289,
+                                "role": "FOOT-ONLY",
+                                "x": 32,
+                                "y": 16
+                            },
+                            {
+                                "hole_id": 1297,
+                                "role": "START",
+                                "x": 40,
+                                "y": 56
+                            },
+                            {
+                                "hole_id": 1508,
+                                "role": "MIDDLE",
+                                "x": 96,
+                                "y": 64
+                            },
+                            {
+                                "hole_id": 1389,
+                                "role": "MIDDLE",
+                                "x": 64,
+                                "y": 88
+                            },
+                            {
+                                "hole_id": 1476,
+                                "role": "MIDDLE",
+                                "x": 88,
+                                "y": 96
+                            },
+                            {
+                                "hole_id": 1557,
+                                "role": "MIDDLE",
+                                "x": 112,
+                                "y": 104
+                            },
+                            {
+                                "hole_id": 1485,
+                                "role": "FINISH",
+                                "x": 88,
+                                "y": 152
+                            },
+                            {
+                                "hole_id": 1513,
+                                "role": "FOOT-ONLY",
+                                "x": 100,
+                                "y": 36
+                            },
+                            {
+                                "hole_id": 1523,
+                                "role": "FOOT-ONLY",
+                                "x": 108,
+                                "y": 44
+                            },
+                            {
+                                "hole_id": 1567,
+                                "role": "FOOT-ONLY",
+                                "x": 116,
+                                "y": 52
+                            },
+                            {
+                                "hole_id": 1472,
+                                "role": "FOOT-ONLY",
+                                "x": 92,
+                                "y": 76
+                            },
+                            {
+                                "hole_id": 1535,
+                                "role": "FOOT-ONLY",
+                                "x": 108,
+                                "y": 108
+                            }
+                        ],
+                  },
+                ].map((climb) => (
+                  <div key={climb.id} style={styles.climbCard}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      <h3 style={{ margin: 0 }}>{climb.name}</h3>
+
+                      <span
+                        style={{
+                          background: "#0284c7",
+                          padding: "0.25rem 0.6rem",
+                          borderRadius: "999px",
+                          fontSize: "0.85rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {climb.grade}
+                      </span>
+                    </div>
+
+                    <p style={styles.muted}>
+                      {climb.description}
+                    </p>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "1rem",
+                        marginTop: "0.75rem",
+                        color: "#cbd5e1",
+                        fontSize: "0.9rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <span>Angle: {climb.angle}°</span>
+                      <span>Setter: {climb.setter}</span>
+                    </div>
+
+                    <div style={{ marginTop: "1rem" }}>
+                      <button
+                        style={styles.secondaryButton}
+                        onClick={() => {
+                          setRoute({
+                            name: climb.name,
+                            grade: climb.grade,
+                            angle: climb.angle,
+                            holds: climb.holds,
+                          });
+
+                          setMessage(`Loaded ${climb.name}`);
+                        }}
+                      >
+                        Load Climb
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
