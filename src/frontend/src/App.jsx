@@ -1,7 +1,7 @@
 import { useState } from "react";
 import BoardView from "./BoardView";
 
-const API = "http://127.0.0.1:8000";
+const API = "https://board-climbing-web-application.onrender.com";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("generate");
