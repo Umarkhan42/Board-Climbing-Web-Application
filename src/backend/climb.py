@@ -425,9 +425,6 @@ def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
         foot_holds=[],
     )
 
-    # make sure starts are below finishes
-    enforce_start_finish_order(temp_child, board)
-
     line = route_line_from_dna(temp_child, board)
     used = set(temp_child.start_holds + temp_child.finish_holds)
 
@@ -473,7 +470,6 @@ def crossover(a: RouteDNA, b: RouteDNA, board: BoardGraph) -> RouteDNA:
         foot_holds=unique_preserve_order(child_feet),
     )
 
-    enforce_start_finish_order(child, board)
     return child
 
 # Mutation
@@ -533,8 +529,6 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
                 dna.finish_holds[i] = new_hole
                 used.add(new_hole)
 
-    # force correct order after mutating start/finish
-    enforce_start_finish_order(dna, board)
 
     line = route_line_from_dna(dna, board)
 
@@ -616,8 +610,6 @@ def mutate(dna: RouteDNA, board: BoardGraph, mutation_rate: float = 0.1):
     dna.finish_holds = unique_preserve_order(dna.finish_holds)
     dna.foot_holds = unique_preserve_order(dna.foot_holds)
     dna.start_holds, dna.finish_holds = dna.finish_holds, dna.finish_holds
-
-    enforce_start_finish_order(dna, board)
 
 # Run the Genetic Algorithm
 def run_ga(db_path: str,board: BoardGraph,target_grade: str,target_stats: dict,population_size: int = 20,generations: int = 10,mutation_rate: float = 0.1):

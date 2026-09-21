@@ -1,4 +1,6 @@
 __pycache__/
+.venv/
+*.pyc
 report.tex
 *.db
 *.sqlite
