@@ -23,6 +23,34 @@ USERS_DB = BASE_DIR / "users.db"
 BOARD = load_board(DB_PATH)
 BOARD.build_edges(max_hand_distance=180, max_foot_distance=90)
 
+def init_users_db():
+    conn = sqlite3.connect(USERS_DB)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            name TEXT
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS saved_climbs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            climb_name TEXT,
+            grade TEXT,
+            angle INTEGER,
+            holds_json TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+init_users_db()
+
 def get_users_conn():
     conn = sqlite3.connect(USERS_DB)
     conn.row_factory = sqlite3.Row
